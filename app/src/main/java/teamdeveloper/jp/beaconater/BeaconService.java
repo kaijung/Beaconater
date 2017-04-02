@@ -14,15 +14,18 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
+import org.altbeacon.beacon.logging.LogManager;
 import org.altbeacon.beacon.startup.BootstrapNotifier;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 
 import java.util.Collection;
-
+// 自分のアプリで基本的に1つだけ動いている管理するアプリがApplication
+// これを使ってアプリ内で使うサービスを初期化するライブラリの初期化のようなもので使うクラス
+//
 // BeaconServiceクラス
 // Serviceを拡張し、BootstrapNotifierをインターフェースとしたBeaconServiceクラス
 public class BeaconService extends Application implements BootstrapNotifier {
-    private static final String TAG = ".MyApplicationName";
+    private static final String TAG = "mBeaconService";
     private RegionBootstrap regionBootstrap;
 
     @Override
@@ -30,8 +33,13 @@ public class BeaconService extends Application implements BootstrapNotifier {
         super.onCreate();
         Log.d(TAG, "App started up");
         BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
+        // ライブラリ側の動きをログ出すためのもの。
+        LogManager.isVerboseLoggingEnabled();
         // To detect proprietary beacons, you must add a line like below corresponding to your beacon
         // type.  Do a web search for "setBeaconLayout" to get the proper expression.
+        //beaconManager.getBeaconParsers().add(new BeaconParser().
+        //        setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
+
         // AltBeacon以外の端末をBeaconフォーマットに変換
         String IBEACON_FORMAT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
@@ -51,7 +59,8 @@ public class BeaconService extends Application implements BootstrapNotifier {
         Log.d(TAG, "Got a didEnterRegion call");
         // This call to disable will make it so the activity below only gets launched the first time a beacon is seen (until the next time the app is launched)
         // if you want the Activity to launch every single time beacons come into view, remove this call.
-        //regionBootstrap.disable();
+        LogManager.isVerboseLoggingEnabled();
+        regionBootstrap.disable();
         Intent intent = new Intent(this, MainActivity.class);
         // IMPORTANT: in the AndroidManifest.xml definition of this activity, you must set android:launchMode="singleInstance" or you will get two instances
         // created when a user launches the activity manually and it gets launched from here.
@@ -63,5 +72,6 @@ public class BeaconService extends Application implements BootstrapNotifier {
     public void didExitRegion(Region arg0) {
         // Don't care
     }
+
 }
 

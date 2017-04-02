@@ -33,6 +33,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+// 新規プロジェクトを作成してバックグラウンドのみの処理にしたものを試す
+// didEnterのみしか検出
+
 public class MainActivity extends AppCompatActivity implements BeaconConsumer{
 
     BeaconManager mBeaconManager;
@@ -134,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
         //mTextview = (TextView) findViewById(R.id.text_view);
         //setContentView(mTextview);
         mListView = (ListView) findViewById(R.id.list_view);
-
+        mBeaconManager.bind(this);
     }
 
     private void reloadListView() {
@@ -246,6 +249,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
                 //mTextview.append(value+"\n");
                 //mBeacon.add(beacon);
                 beaconlist.add(value);
+                reloadListView();
             }
         });
     }
@@ -261,6 +265,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
         super.onPause();
         mBeaconManager.unbind(this); // サービスの停止
     }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBeaconManager.unbind(this);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
