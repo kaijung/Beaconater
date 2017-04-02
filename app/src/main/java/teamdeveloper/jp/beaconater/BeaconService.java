@@ -43,6 +43,11 @@ public class BeaconService extends Application implements BootstrapNotifier {
         // AltBeacon以外の端末をBeaconフォーマットに変換
         String IBEACON_FORMAT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
+        // バックグラウンド処理間隔
+        beaconManager.setBackgroundBetweenScanPeriod(500);
+
+        // これは上と何が違うのか
+        beaconManager.setBackgroundScanPeriod(500);
 
         // wake up the app when any beacon is seen (you can specify specific id filers in the parameters below)
         Region region = new Region("", null, null, null);
