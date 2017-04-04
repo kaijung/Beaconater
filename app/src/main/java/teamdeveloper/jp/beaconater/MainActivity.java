@@ -18,8 +18,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -35,6 +39,9 @@ import java.util.List;
 
 // 新規プロジェクトを作成してバックグラウンドのみの処理にしたものを試す
 // didEnterのみしか検出
+// Todo : MainActivityは登録されたBeaconだけが表示されるクラス
+// Todo : BeaconAdapterはListView用
+// ToDo : Subtitle用も設定しないと
 
 public class MainActivity extends AppCompatActivity implements BeaconConsumer{
 
@@ -50,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
     private ListView mListView;
     //TextView mTextview1;
     //TextView mTextview2;
+
+    private ShowcaseView view;
 
     private List<String> beaconlist;
 
@@ -123,16 +132,25 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+            public void onClick(View v) {
+                Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                view.hide();
             }
         });
 
+        view = new ShowcaseView.Builder(this)
+                .setTarget(new ViewTarget(fab))
+                .setContentTitle("ようこそ")
+                .setContentText("ここから登録が行なえます")
+                .setStyle(R.style.CustomShowcaseTheme)
+                .withMaterialShowcase()
+                .doNotBlockTouches() //ShowcaseView下のボタンを触れるように。
+                .build();
+        view.hideButton(); // Showcase上のボタンを隠す。
+
         mRegion = new Region("", null, null, null);
         //new Region(null, null, null, null)
-        // パーミッションの許可状態を確認する
-
 
         //mTextview = (TextView) findViewById(R.id.text_view);
         //setContentView(mTextview);
@@ -212,18 +230,18 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
                             + ", Distance:" + beacon.getDistance()+ ",RSSI" + beacon.getRssi());
                     Log.d("Beacon", str);
                     if(beacon.getDistance()<5) {
-                        if (mBeacon == null) {
-                            setText(beacon, str);
+                        if (beaconlist == null) {
+                            setText(str,""+beacon.getId1());
                             //mListView.set(0,str);
-                        } else if (mBeacon != null) {
+                        } else if (beaconlist != null) {
                             Boolean mBoolean = false;
-                            for(int i = 0; i < mBeacon.size();i++){
-                                if(mBeacon.get(i).getId1().equals(beacon.getId1())==true){
+                            for(int i = 0; i < beaconlist.size();i++){
+                                if(beaconlist.get(i).equals(""+beacon.getId1())==true){
                                     mBoolean = true;
                                 }
                             }
                             if(mBoolean == false) {
-                                setText(beacon, str);
+                                setText(str,""+beacon.getId1());
                             }
                         }
                     }
@@ -241,14 +259,15 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
         }
     }
 
+
     //そのままSetTextするとエラーが起きたのでStackOverflowより
-    private void setText(final Beacon beacon, final String value){
+    private void setText(final String name, final String uuid){
         runOnUiThread(new Runnable(){
             @Override
             public void run() {
                 //mTextview.append(value+"\n");
                 //mBeacon.add(beacon);
-                beaconlist.add(value);
+                beaconlist.add(uuid);
                 reloadListView();
             }
         });
