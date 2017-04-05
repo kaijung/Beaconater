@@ -299,12 +299,14 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
     @Override
     protected void onResume() {
         super.onResume();
+        if(mBeaconManager!=null)
         mBeaconManager.bind(this); // サービスの開始
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        if(mBeaconManager!=null)
         mBeaconManager.unbind(this); // サービスの停止
     }
 
