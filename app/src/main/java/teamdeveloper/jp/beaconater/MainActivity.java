@@ -3,6 +3,7 @@ package teamdeveloper.jp.beaconater;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -58,107 +59,116 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
     private ListView mListView;
     //TextView mTextview1;
     //TextView mTextview2;
-
     private ShowcaseView view;
-
     private List<String> beaconlist;
-
     ArrayList<Beacon> mBeacon = new ArrayList<>();
+
+    //Sharedプリファレンス
+    private SharedPreferences preference;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // 保存
+        SharedPreferences data = getSharedPreferences("Data", MODE_PRIVATE);
+        SharedPreferences.Editor editor = data.edit();
+        boolean dataBoolean = data.getBoolean("DataBoolean", false);
+
+        if(data.getBoolean("DataBoolean", true)){
         // AppLaunchCheckerはSharedPreferrenceを使った初回起動か否かを取得するもの
-        if(AppLaunchChecker.hasStartedFromLauncher(this)){
-            Log.d("AppLaunchChecker","2回目以降");
+           // if(AppLaunchChecker.hasStartedFromLauncher(this)){
+                Log.d("AppLaunchChecker","2回目以降");
 
-        /**
-         * 2017/03/28 書き始め
-         */
-        // インスタンス化
-        mBeaconManager = BeaconManager.getInstanceForApplication(this);
+            /**
+             * 2017/03/28 書き始め
+             */
+            // インスタンス化
+            mBeaconManager = BeaconManager.getInstanceForApplication(this);
 
 
-        // AltBeacon以外の端末をBeaconフォーマットに変換
-        String IBEACON_FORMAT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
-        mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
+            // AltBeacon以外の端末をBeaconフォーマットに変換
+            String IBEACON_FORMAT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
+            mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
 
-        /*adapter = new ArrayAdapter<String>(getApplicationContext(),
-                android.R.layout.simple_list_item_1);
-                */
-        // ListViewの設定
-        mBeaconAdapter = new BeaconAdapter(MainActivity.this);
-        mListView = (ListView) findViewById(R.id.list_view);
-        beaconlist = new ArrayList<String>();
+            /*adapter = new ArrayAdapter<String>(getApplicationContext(),
+                    android.R.layout.simple_list_item_1);
+                    */
+            // ListViewの設定
+            mBeaconAdapter = new BeaconAdapter(MainActivity.this);
+            mListView = (ListView) findViewById(R.id.list_view);
+            beaconlist = new ArrayList<String>();
 
-        reloadListView();
+            reloadListView();
 
-        // ListViewをタップしたときの処理
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // 入力・編集する画面に遷移させる
-            }
-        });
+            // ListViewをタップしたときの処理
+            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    // 入力・編集する画面に遷移させる
+                }
+            });
 
-        //reloadListView();
+            //reloadListView();
 
-        // ListViewを長押ししたときの処理
-        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            // ListViewを長押ししたときの処理
+            mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                // タスクを削除する
+                    // タスクを削除する
 
-                return true;
-            }
-        });
+                    return true;
+                }
+            });
 
-        // FloatingActionの処理を入れる。
-        // 別Activityに飛ばして検知画面を出す予定
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                view.hide();
-            }
-        });
+            // FloatingActionの処理を入れる。
+            // 別Activityに飛ばして登録画面を出す予定
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    view.hide();
+                }
+            });
 
-        view = new ShowcaseView.Builder(this)
-                .setTarget(new ViewTarget(fab))
-                .setContentTitle("ようこそ")
-                .setContentText("ここから登録が行なえます")
-                .setStyle(R.style.CustomShowcaseTheme)
-                .withMaterialShowcase()
-                .doNotBlockTouches() //ShowcaseView下のボタンを触れるように。
-                .build();
-        view.hideButton(); // Showcase上のボタンを隠す。
+            view = new ShowcaseView.Builder(this)
+                    .setTarget(new ViewTarget(fab))
+                    .setContentTitle("ようこそ")
+                    .setContentText("ここから登録が行なえます")
+                    .setStyle(R.style.CustomShowcaseTheme)
+                    .withMaterialShowcase()
+                    .doNotBlockTouches() //ShowcaseView下のボタンを触れるように。
+                    .build();
+            view.hideButton(); // Showcase上のボタンを隠す。
 
-        mRegion = new Region("", null, null, null);
-        //new Region(null, null, null, null)
+            mRegion = new Region("", null, null, null);
+            //new Region(null, null, null, null)
 
-        //mTextview = (TextView) findViewById(R.id.text_view);
-        //setContentView(mTextview);
-        mListView = (ListView) findViewById(R.id.list_view);
-        mBeaconManager.bind(this);
+            //mTextview = (TextView) findViewById(R.id.text_view);
+            //setContentView(mTextview);
+            mListView = (ListView) findViewById(R.id.list_view);
+            mBeaconManager.bind(this);
 
 
         } else {
+            editor.putBoolean("DataBoolean", true);
+            editor.commit();
             Log.d("AppLaunchChecker","はじめてアプリを起動した");
             Intent intent = new Intent(this, StartActivity.class);
             // IMPORTANT: in the AndroidManifest.xml definition of this activity, you must set android:launchMode="singleInstance" or you will get two instances
             // created when a user launches the activity manually and it gets launched from here.
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             this.startActivity(intent);
-        }
 
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {

@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.v4.app.AppLaunchChecker;
 import android.util.Log;
 
 import org.altbeacon.beacon.Beacon;
@@ -31,6 +32,7 @@ public class BeaconService extends Application implements BootstrapNotifier {
     @Override
     public void onCreate() {
         super.onCreate();
+
         Log.d(TAG, "App started up");
         BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
         // ライブラリ側の動きをログ出すためのもの。
