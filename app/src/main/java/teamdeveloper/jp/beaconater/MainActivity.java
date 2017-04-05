@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.AppLaunchChecker;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -69,18 +70,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                // 許可されている
-                Log.d("ANDROID", "許可されている");
-                // サービス起動
-                //startService(new Intent(MainActivity.this, BeaconService.class));
-            } else {
-                Log.d("ANDROID", "許可されていない");
-                // 許可されていないので許可ダイアログを表示する
-                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE);
-            }
-        }
+        // AppLaunchCheckerはSharedPreferrenceを使った初回起動か否かを取得するもの
+        if(AppLaunchChecker.hasStartedFromLauncher(this)){
+            Log.d("AppLaunchChecker","2回目以降");
 
         /**
          * 2017/03/28 書き始め
@@ -156,6 +148,32 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
         //setContentView(mTextview);
         mListView = (ListView) findViewById(R.id.list_view);
         mBeaconManager.bind(this);
+
+
+        } else {
+            Log.d("AppLaunchChecker","はじめてアプリを起動した");
+            Intent intent = new Intent(this, StartActivity.class);
+            // IMPORTANT: in the AndroidManifest.xml definition of this activity, you must set android:launchMode="singleInstance" or you will get two instances
+            // created when a user launches the activity manually and it gets launched from here.
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            this.startActivity(intent);
+        }
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                // 許可されている
+                Log.d("ANDROID", "許可されている");
+                // サービス起動
+                //startService(new Intent(MainActivity.this, BeaconService.class));
+            } else {
+                Log.d("ANDROID", "許可されていない");
+                // 許可されていないので許可ダイアログを表示する
+                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE);
+            }
+        }
+        AppLaunchChecker.onActivityCreate(this);
+
     }
 
     private void reloadListView() {
@@ -230,13 +248,18 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
                             + ", Distance:" + beacon.getDistance()+ ",RSSI" + beacon.getRssi());
                     Log.d("Beacon", str);
                     if(beacon.getDistance()<5) {
-                        if (beaconlist == null) {
+                        Log.d("Beaconater",""+mBeaconAdapter.getCount());
+                        if (mBeaconAdapter.getCount() == 0) {
                             setText(str,""+beacon.getId1());
+                            Log.d("Beaconater","Nulldでした");
+
                             //mListView.set(0,str);
-                        } else if (beaconlist != null) {
+                        } else if (mBeaconAdapter.getCount() > 0) {
                             Boolean mBoolean = false;
-                            for(int i = 0; i < beaconlist.size();i++){
-                                if(beaconlist.get(i).equals(""+beacon.getId1())==true){
+                            for(int i = 0; i < mBeaconAdapter.getCount();i++){
+                                if(mBeaconAdapter.getItem(i).equals(""+beacon.getId1())==true){
+                                    Log.d("Beaconater","ちゃんと見てます");
+
                                     mBoolean = true;
                                 }
                             }
@@ -248,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
                 }
             }
         });
-        reloadListView();
+        //reloadListView();
 
         try {
             // ビーコン情報の監視を開始
@@ -283,11 +306,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
     protected void onPause() {
         super.onPause();
         mBeaconManager.unbind(this); // サービスの停止
-    }
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mBeaconManager.unbind(this);
     }
 
 
