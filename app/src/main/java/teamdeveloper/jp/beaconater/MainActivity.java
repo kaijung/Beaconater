@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d("MainActivity","起動しました");
 
         // 保存
         SharedPreferences data = getSharedPreferences("Data", MODE_PRIVATE);
