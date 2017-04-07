@@ -92,8 +92,10 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
                             + beacon.getId2()+ ", minor:" + beacon.getId3()
                             + ", Distance:" + beacon.getDistance()+ ",RSSI" + beacon.getRssi());
                     Log.d("Beacon", str);
+
+                    // ServiceとActivityの連携部分をやらないといけない。
                     BeaconActivity mBeacon = new BeaconActivity();
-                    mBeacon.setBeacon(""+beacon.getId1());
+                    if(beacon.getId1()!=null) mBeacon.setBeacon(""+beacon.getId1());
 
 
                     /*
