@@ -45,124 +45,46 @@ import java.util.List;
 // Todo : BeaconAdapterはListView用
 // ToDo : Subtitle用も設定しないと
 
-public class MainActivity extends AppCompatActivity implements BeaconConsumer{
-
-    BeaconManager mBeaconManager;
-
-    private static final int PERMISSIONS_REQUEST_CODE = 1;
-    private BeaconAdapter mBeaconAdapter;
-
-    //任意のBeaconを指定するのに便利
-    private Region mRegion;
-
+public class MainActivity extends AppCompatActivity{
     //TextView mTextview;
     private ListView mListView;
-    //TextView mTextview1;
-    //TextView mTextview2;
-    private ShowcaseView view;
+    private BeaconManager mBeaconManager;
+    private static final int PERMISSIONS_REQUEST_CODE = 1;
+    private BeaconAdapter mBeaconAdapter;
     private List<String> beaconlist;
-    ArrayList<Beacon> mBeacon = new ArrayList<>();
-
     //Sharedプリファレンス
     private SharedPreferences preference;
     private SharedPreferences.Editor editor;
+
+
+    private static String TAG = "MyApp";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d("MainActivity","起動しました");
 
-        // 保存
-        SharedPreferences data = getSharedPreferences("Data", MODE_PRIVATE);
-        SharedPreferences.Editor editor = data.edit();
-        boolean dataBoolean = data.getBoolean("DataBoolean", false);
-
-        if(data.getBoolean("DataBoolean", true)){
-        // AppLaunchCheckerはSharedPreferrenceを使った初回起動か否かを取得するもの
-           // if(AppLaunchChecker.hasStartedFromLauncher(this)){
-                Log.d("AppLaunchChecker","2回目以降");
-
-            /**
-             * 2017/03/28 書き始め
-             */
-            // インスタンス化
-            mBeaconManager = BeaconManager.getInstanceForApplication(this);
-
-
-            // AltBeacon以外の端末をBeaconフォーマットに変換
-            String IBEACON_FORMAT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
-            mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
-
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
+        mListView = (ListView) findViewById(R.id.list_view);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
             /*adapter = new ArrayAdapter<String>(getApplicationContext(),
                     android.R.layout.simple_list_item_1);
                     */
-            // ListViewの設定
-            mBeaconAdapter = new BeaconAdapter(MainActivity.this);
-            mListView = (ListView) findViewById(R.id.list_view);
-            beaconlist = new ArrayList<String>();
+        // ListViewの設定
+        mBeaconAdapter = new BeaconAdapter(MainActivity.this);
+        mListView = (ListView) findViewById(R.id.list_view);
+        beaconlist = new ArrayList<String>();
 
-            reloadListView();
+        // 保存
+        preference = getSharedPreferences("Data", MODE_PRIVATE);
+        editor = preference.edit();
+        boolean dataBoolean = preference.getBoolean("DataBoolean", false);
+        //作成途中 : data.getStringSet()
 
-            // ListViewをタップしたときの処理
-            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    // 入力・編集する画面に遷移させる
-                }
-            });
-
-            //reloadListView();
-
-            // ListViewを長押ししたときの処理
-            mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    // タスクを削除する
-
-                    return true;
-                }
-            });
-
-            // FloatingActionの処理を入れる。
-            // 別Activityに飛ばして登録画面を出す予定
-            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    view.hide();
-                }
-            });
-
-            view = new ShowcaseView.Builder(this)
-                    .setTarget(new ViewTarget(fab))
-                    .setContentTitle("ようこそ")
-                    .setContentText("ここから登録が行なえます")
-                    .setStyle(R.style.CustomShowcaseTheme)
-                    .withMaterialShowcase()
-                    .doNotBlockTouches() //ShowcaseView下のボタンを触れるように。
-                    .build();
-            view.hideButton(); // Showcase上のボタンを隠す。
-
-            mRegion = new Region("", null, null, null);
-            //new Region(null, null, null, null)
-
-            //mTextview = (TextView) findViewById(R.id.text_view);
-            //setContentView(mTextview);
-            mListView = (ListView) findViewById(R.id.list_view);
-            mBeaconManager.bind(this);
-
-
-        } else {
-            editor.putBoolean("DataBoolean", true);
-            editor.commit();
+        if(preference.getBoolean("DataBoolean", false)==false) {
             Log.d("AppLaunchChecker","はじめてアプリを起動した");
+
             Intent intent = new Intent(this, StartActivity.class);
             // IMPORTANT: in the AndroidManifest.xml definition of this activity, you must set android:launchMode="singleInstance" or you will get two instances
             // created when a user launches the activity manually and it gets launched from here.
@@ -170,6 +92,47 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
             this.startActivity(intent);
 
         }
+        else {
+            // AppLaunchCheckerはSharedPreferrenceを使った初回起動か否かを取得するもの
+            // if(AppLaunchChecker.hasStartedFromLauncher(this)){
+            Log.d("AppLaunchChecker", "2回目以降");
+            startService(new Intent(MainActivity.this, BeaconService2.class));
+
+        }
+
+        reloadListView();
+
+        // ListViewをタップしたときの処理
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // 入力・編集する画面に遷移させる
+            }
+        });
+
+        //reloadListView();
+
+        // ListViewを長押ししたときの処理
+        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+                // タスクを削除する
+
+                return true;
+            }
+        });
+
+        // FloatingActionの処理を入れる。
+        // 別Activityに飛ばして登録画面を出す予定
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -183,21 +146,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
                 requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE);
             }
         }
-        AppLaunchChecker.onActivityCreate(this);
+        editor.putBoolean("DataBoolean", true);
+        editor.commit();
 
-    }
-
-    private void reloadListView() {
-
-        // 後で他のクラスに変更する
-        //List<String> beaconlist = new ArrayList<String>();
-        //beaconlist.add("aaa");
-        //beaconlist.add("bbb");
-        //beaconlist.add("ccc");
-
-        mBeaconAdapter.setBeaconList(beaconlist);
-        mListView.setAdapter(mBeaconAdapter);
-        mBeaconAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -215,85 +166,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
         }
     }
 
-
-    // Beaconサービスの開始
-    @Override
-    public void onBeaconServiceConnect() {
-        mBeaconManager.addMonitorNotifier(new MonitorNotifier() {
-
-            @Override
-            public void didEnterRegion(Region region) {
-                // 領域への入場を検知
-                // レンジングの開始
-                try {
-                    mBeaconManager.startRangingBeaconsInRegion(mRegion);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void didExitRegion(Region region) {
-                // 領域からの退場を検知
-                // レンジングの停止
-                try {
-                    mBeaconManager.stopRangingBeaconsInRegion(mRegion);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-            }
-            @Override
-            public void didDetermineStateForRegion(int state, Region region) {
-                Log.i("Beaconator", "I have just switched from seeing/not seeing beacons: "+state);
-            }
-        });
-
-        mBeaconManager.setRangeNotifier(new RangeNotifier() {
-            @Override
-            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-                // 検出したビーコンの情報を全部Logに書き出す
-                for(Beacon beacon : beacons) {
-                    // ログの出力
-                    String str = ("UUID:" + beacon.getId1() + ", major:"
-                            + beacon.getId2()+ ", minor:" + beacon.getId3()
-                            + ", Distance:" + beacon.getDistance()+ ",RSSI" + beacon.getRssi());
-                    Log.d("Beacon", str);
-                    if(beacon.getDistance()<5) {
-                        Log.d("Beaconater",""+mBeaconAdapter.getCount());
-                        if (mBeaconAdapter.getCount() == 0) {
-                            setText(str,""+beacon.getId1());
-                            Log.d("Beaconater","Nulldでした");
-
-                            //mListView.set(0,str);
-                        } else if (mBeaconAdapter.getCount() > 0) {
-                            Boolean mBoolean = false;
-                            for(int i = 0; i < mBeaconAdapter.getCount();i++){
-                                if(mBeaconAdapter.getItem(i).equals(""+beacon.getId1())==true){
-                                    Log.d("Beaconater","ちゃんと見てます");
-
-                                    mBoolean = true;
-                                }
-                            }
-                            if(mBoolean == false) {
-                                setText(str,""+beacon.getId1());
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        //reloadListView();
-
-        try {
-            // ビーコン情報の監視を開始
-            mBeaconManager.startMonitoringBeaconsInRegion(mRegion);
-            //mBeaconManager.startMonitoringBeaconsInRegion(new Region("myMonitoringUniqueId", null, null, null));
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     //そのままSetTextするとエラーが起きたのでStackOverflowより
     private void setText(final String name, final String uuid){
         runOnUiThread(new Runnable(){
@@ -301,26 +173,37 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer{
             public void run() {
                 //mTextview.append(value+"\n");
                 //mBeacon.add(beacon);
-                beaconlist.add(uuid);
-                reloadListView();
+
+                ///後で有効化するようにする
+                //beaconlist.add(uuid);
+                //reloadListView();
             }
         });
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(mBeaconManager!=null)
-        mBeaconManager.bind(this); // サービスの開始
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(mBeaconManager!=null)
-        mBeaconManager.unbind(this); // サービスの停止
-    }
+    private void reloadListView() {
 
+        // 後で他のクラスに変更する
+        //List<String> beaconlist = new ArrayList<String>();
+        //beaconlist.add("aaa");
+        //beaconlist.add("bbb");
+        //beaconlist.add("ccc");
+
+        mBeaconAdapter.setBeaconList(beaconlist);
+        mListView.setAdapter(mBeaconAdapter);
+        mBeaconAdapter.notifyDataSetChanged();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -26,6 +26,10 @@ import java.util.Collection;
 // BeaconServiceクラス
 // Serviceを拡張し、BootstrapNotifierをインターフェースとしたBeaconServiceクラス
 public class BeaconService extends Application implements BootstrapNotifier {
+
+
+
+
     private static final String TAG = "mBeaconService";
     private RegionBootstrap regionBootstrap;
 
