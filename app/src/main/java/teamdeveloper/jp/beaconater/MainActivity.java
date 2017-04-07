@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity{
     private BeaconManager mBeaconManager;
     private static final int PERMISSIONS_REQUEST_CODE = 1;
     private BeaconAdapter mBeaconAdapter;
-    private List<String> beaconlist;
+    //private List<String> beaconlist;
     //Sharedプリファレンス
     private SharedPreferences preference;
     private SharedPreferences.Editor editor;
@@ -64,17 +64,14 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mListView = (ListView) findViewById(R.id.list_view);
+        /*mListView = (ListView) findViewById(R.id.list_view);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        */
 
-            /*adapter = new ArrayAdapter<String>(getApplicationContext(),
-                    android.R.layout.simple_list_item_1);
-                    */
+
         // ListViewの設定
-        mBeaconAdapter = new BeaconAdapter(MainActivity.this);
         mListView = (ListView) findViewById(R.id.list_view);
-        beaconlist = new ArrayList<String>();
 
         // 保存
         preference = getSharedPreferences("Data", MODE_PRIVATE);
@@ -96,13 +93,25 @@ public class MainActivity extends AppCompatActivity{
             // AppLaunchCheckerはSharedPreferrenceを使った初回起動か否かを取得するもの
             // if(AppLaunchChecker.hasStartedFromLauncher(this)){
             Log.d("AppLaunchChecker", "2回目以降");
-            startService(new Intent(MainActivity.this, BeaconService2.class));
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    // 許可されている
+                    Log.d("ANDROID", "許可されている");
+                    // サービス起動
+                    //startService(new Intent(MainActivity.this, BeaconService.class));
+                } else {
+                    Log.d("ANDROID", "許可されていない");
+                    // 許可されていないので許可ダイアログを表示する
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE);
+                }
+            }
+            //startService(new Intent(MainActivity.this, BeaconService2.class));
 
         }
 
-        reloadListView();
-
         // ListViewをタップしたときの処理
+        // 編集画面へ遷移
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -131,21 +140,15 @@ public class MainActivity extends AppCompatActivity{
             public void onClick(View v) {
                 Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                Intent intent = new Intent(MainActivity.this, BeaconActivity.class);
+                // IMPORTANT: in the AndroidManifest.xml definition of this activity, you must set android:launchMode="singleInstance" or you will get two instances
+                // created when a user launches the activity manually and it gets launched from here.
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                MainActivity.this.startActivity(intent);
+
             }
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                // 許可されている
-                Log.d("ANDROID", "許可されている");
-                // サービス起動
-                //startService(new Intent(MainActivity.this, BeaconService.class));
-            } else {
-                Log.d("ANDROID", "許可されていない");
-                // 許可されていないので許可ダイアログを表示する
-                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE);
-            }
-        }
         editor.putBoolean("DataBoolean", true);
         editor.commit();
 
@@ -192,18 +195,6 @@ public class MainActivity extends AppCompatActivity{
         super.onResume();
     }
 
-    private void reloadListView() {
-
-        // 後で他のクラスに変更する
-        //List<String> beaconlist = new ArrayList<String>();
-        //beaconlist.add("aaa");
-        //beaconlist.add("bbb");
-        //beaconlist.add("ccc");
-
-        mBeaconAdapter.setBeaconList(beaconlist);
-        mListView.setAdapter(mBeaconAdapter);
-        mBeaconAdapter.notifyDataSetChanged();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

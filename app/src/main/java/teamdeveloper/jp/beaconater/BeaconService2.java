@@ -49,25 +49,29 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
     private ShowcaseView view;
     private List<String> beaconlist;
     ArrayList<Beacon> mBeacon = new ArrayList<>();
+    MainActivity mMain;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d("BeaconService2","起動しました");
 
-            /**
-             * 2017/03/28 書き始め
-             */
-            // インスタンス化
-            mBeaconManager = BeaconManager.getInstanceForApplication(this);
-            // AltBeacon以外の端末をBeaconフォーマットに変換
-            String IBEACON_FORMAT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
-            mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
-            mRegion = new Region("", null, null, null);
-            //new Region(null, null, null, null)
-            //mTextview = (TextView) findViewById(R.id.text_view);
-            //setContentView(mTextview);
-            //mBeaconManager.bind(BeaconService2.this);
+        /**
+         * 2017/03/28 書き始め
+         */
+        // インスタンス化
+        mBeaconManager = BeaconManager.getInstanceForApplication(this);
+        // AltBeacon以外の端末をBeaconフォーマットに変換
+        String IBEACON_FORMAT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
+        mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
+        mRegion = new Region("", null, null, null);
+        //new Region(null, null, null, null)
+        //mTextview = (TextView) findViewById(R.id.text_view);
+        //setContentView(mTextview);
+        //mBeaconManager.bind(BeaconService2.this);
+
+//        mMain = new MainActivity();
+//        mBeaconAdapter = new BeaconAdapter(mMain);
 
         regionBootstrap = new RegionBootstrap(this, mRegion);
 
@@ -84,7 +88,7 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
                     if(beacon.getDistance()<5) {
                         //Log.d("Beaconater",""+mBeaconAdapter.getCount());
                         if (mBeaconAdapter.getCount() == 0) {
-                            //MainActivity.setText(str,""+beacon.getId1());
+                            setText(str,""+beacon.getId1());
                             //Log.d("Beaconater","Nulldでした");
 
                             //mListView.set(0,str);
@@ -98,7 +102,7 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
                                 }
                             }
                             if(mBoolean == false) {
-                                //setText(str,""+beacon.getId1());
+                                setText(str,""+beacon.getId1());
                             }
                         }
                     }
@@ -106,16 +110,19 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
             }
         });
         //reloadListView();
+    }
 
-        try {
-            // ビーコン情報の監視を開始
-            mBeaconManager.startMonitoringBeaconsInRegion(mRegion);
-            //mBeaconManager.startMonitoringBeaconsInRegion(new Region("myMonitoringUniqueId", null, null, null));
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+    //そのままSetTextするとエラーが起きたのでStackOverflowより
+    private void setText(final String name, final String uuid){
+        //mTextview.append(value+"\n");
+        //mBeacon.add(beacon);
 
-
+        ///後で有効化するようにする
+        beaconlist.add(uuid);
+        mBeaconAdapter.setBeaconList(beaconlist);
+        //mListView.setAdapter(mBeaconAdapter);
+        mBeaconAdapter.notifyDataSetChanged();
+        //mMain.reloadListView(beaconlist);
     }
 
     @Override
@@ -142,17 +149,10 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
 
-        try {
-            // レンジング開始
-            mBeaconManager.startRangingBeaconsInRegion(region);
-        } catch (RemoteException e) {
-            // 例外が発生した場合
-            e.printStackTrace();
-        }
         // 領域への入場を検知
         // レンジングの開始
         try {
-            mBeaconManager.startRangingBeaconsInRegion(mRegion);
+            mBeaconManager.startRangingBeaconsInRegion(region);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

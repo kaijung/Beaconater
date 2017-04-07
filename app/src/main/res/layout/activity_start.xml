@@ -1,54 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="teamdeveloper.jp.beaconater.StartActivity">
+    android:layout_height="match_parent">
 
+    <!-- 空の View -->
+    <View
+        android:id="@+id/center_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true"
+        />
 
-
+    <!-- Left -->
     <Button
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:id="@+id/Skip"
-        android:layout_width="190dp"
-        android:layout_height="40dp"
         android:background="@android:color/holo_orange_dark"
         android:text="スキップ"
         android:textColor="@android:color/background_light"
-        android:textStyle="bold"
-        app:layout_constraintHorizontal_weight="0.5"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        tools:layout_editor_absoluteY="527dp"
-        android:layout_marginLeft="0dp"
-        android:layout_marginBottom="0dp" />
+        android:layout_centerVertical="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignRight="@+id/center_view"
+        />
 
+    <!-- Right -->
     <Button
         android:id="@+id/Tutorial"
-        android:layout_width="190dp"
-        android:layout_height="40dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignLeft="@+id/center_view"
         android:background="@android:color/holo_blue_light"
         android:text="チュートリアル開始"
         android:textColor="@android:color/background_light"
-        android:textStyle="bold"
-        app:layout_constraintHorizontal_weight="0.5"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        tools:layout_editor_absoluteY="531dp"
-        tools:layout_editor_absoluteX="196dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginBottom="0dp" />
-    />
+        />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome to Beaconater!"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="100dp"
+        android:textSize="30dp"
+        />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="30dp"
+        android:layout_centerHorizontal="true"
+
+        app:srcCompat="@mipmap/icon"/>
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="341dp"
         android:layout_height="86dp"
+
         android:text="※本アプリではBluetoothを利用します。 アプリを長時間使用する場合は バッテリーの消費が著しく減る可能性が ございますので、予めご了承ください。"
         android:textAlignment="center"
         android:textSize="16dp"
-        tools:layout_editor_absoluteX="22dp"
-        tools:layout_editor_absoluteY="371dp" />
+        android:layout_below="@+id/textView3"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp" />
 
     <TextView
         android:id="@+id/textView3"
@@ -57,23 +82,8 @@
         android:text="はじめてご利用の方は チュートリアルをご覧ください"
         android:textAlignment="center"
         android:textSize="20dp"
-        tools:layout_editor_absoluteX="21dp"
-        tools:layout_editor_absoluteY="298dp" />
+        android:layout_below="@+id/imageView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
 
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Welcome to Beaconater!"
-        android:textSize="22dp"
-        tools:layout_editor_absoluteX="71dp"
-        tools:layout_editor_absoluteY="71dp" />
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="140dp"
-        android:layout_height="120dp"
-        app:srcCompat="@mipmap/icon"
-        tools:layout_editor_absoluteX="122dp"
-        tools:layout_editor_absoluteY="129dp" />
-</android.support.constraint.ConstraintLayout>
+</RelativeLayout>
