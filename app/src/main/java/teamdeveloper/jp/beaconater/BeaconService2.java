@@ -1,6 +1,7 @@
 package teamdeveloper.jp.beaconater;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +13,8 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -64,6 +67,9 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
         // AltBeacon以外の端末をBeaconフォーマットに変換
         String IBEACON_FORMAT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
         mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
+        mBeaconManager.setForegroundBetweenScanPeriod(1000);
+        mBeaconManager.setBackgroundBetweenScanPeriod(1000);
+
         mRegion = new Region("", null, null, null);
         //new Region(null, null, null, null)
         //mTextview = (TextView) findViewById(R.id.text_view);
@@ -75,6 +81,7 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
 
         regionBootstrap = new RegionBootstrap(this, mRegion);
 
+        //mBeaconManager.bind(BeaconService2.this);
         mBeaconManager.setRangeNotifier(new RangeNotifier() {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
@@ -84,7 +91,12 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
                     String str = ("UUID:" + beacon.getId1() + ", major:"
                             + beacon.getId2()+ ", minor:" + beacon.getId3()
                             + ", Distance:" + beacon.getDistance()+ ",RSSI" + beacon.getRssi());
-                    //Log.d("Beacon", str);
+                    Log.d("Beacon", str);
+                    BeaconActivity mBeacon = new BeaconActivity();
+                    mBeacon.setBeacon(""+beacon.getId1());
+
+
+                    /*
                     if(beacon.getDistance()<5) {
                         //Log.d("Beaconater",""+mBeaconAdapter.getCount());
                         if (mBeaconAdapter.getCount() == 0) {
@@ -106,6 +118,7 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
                             }
                         }
                     }
+                    */
                 }
             }
         });
@@ -145,9 +158,24 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
     public void didEnterRegion(Region region) {
         // 領域侵入
         Log.d("BeaconService2", "Enter Region");
+        /*
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+        */
+        Intent resultIntent = new Intent(getApplicationContext(), BeaconNotification.class);
+        PendingIntent resultPendingIntent = PendingIntent.getBroadcast(
+                this,
+                0,
+                resultIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
+
+        builder.setSmallIcon(R.mipmap.icon);
+
+        NotificationManagerCompat manager = NotificationManagerCompat.from(getApplicationContext());
+        manager.notify(0, builder.build());
 
         // 領域への入場を検知
         // レンジングの開始

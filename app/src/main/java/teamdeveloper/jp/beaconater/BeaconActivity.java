@@ -19,20 +19,16 @@ import android.widget.ListView;
 
 import org.altbeacon.beacon.BeaconManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BeaconActivity extends AppCompatActivity {
     private ListView mListView;
-    private BeaconManager mBeaconManager;
-    private static final int PERMISSIONS_REQUEST_CODE = 1;
+    //private BeaconManager mBeaconManager;
+    //private static final int PERMISSIONS_REQUEST_CODE = 1;
     private BeaconAdapter mBeaconAdapter;
     private List<String> beaconlist;
-    //Sharedプリファレンス
-    private SharedPreferences preference;
-    private SharedPreferences.Editor editor;
-
-
-    private static String TAG = "MyApp";
+    //private static String TAG = "MyApp";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +41,7 @@ public class BeaconActivity extends AppCompatActivity {
         mListView = (ListView) findViewById(R.id.list_view2);
 
         mBeaconAdapter = new BeaconAdapter(this);
+        beaconlist = new ArrayList<String>();
 
         // ListViewをタップしたときの処理
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -70,18 +67,37 @@ public class BeaconActivity extends AppCompatActivity {
         startService(new Intent(BeaconActivity.this, BeaconService2.class));
     }
 
+    public void setBeacon(final String uuid) {
+        runOnUiThread(new Runnable(){
+            @Override
+            public void run() {
+                Log.d("run","ここまで動いているよー");
+                //mTextview.append(value+"\n");
+                //mBeacon.add(beacon);
+
+                ///後で有効化するようにする
+                beaconlist.add(uuid);
+                reloadListView();
+            }
+        });
+        //beaconlist.add(uuid);
+        //reloadListView();
+        //return mListView;
+    }
+
 
     public void reloadListView() {
-
         // 後で他のクラスに変更する
         //List<String> beaconlist = new ArrayList<String>();
         //beaconlist.add("aaa");
-        //beaconlist.add("bbb");
-        //beaconlist.add("ccc");
+        //beaconlist.add();
+
+        Log.d("reloadListView","ここまで動いているよー");
 
         mBeaconAdapter.setBeaconList(beaconlist);
         mListView.setAdapter(mBeaconAdapter);
         mBeaconAdapter.notifyDataSetChanged();
+
     }
 
     //そのままSetTextするとエラーが起きたのでStackOverflowより
