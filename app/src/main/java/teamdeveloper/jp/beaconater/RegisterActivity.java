@@ -27,6 +27,9 @@ import io.realm.RealmResults;
 
 import static android.content.Context.ALARM_SERVICE;
 
+// ToDo: Realm使ってRegister
+// ToDo: 入力が足りないときの禁則処理s
+
 public class RegisterActivity {
     /*
     private int mYear, mMonth, mDay, mHour, mMinute;

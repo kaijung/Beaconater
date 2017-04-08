@@ -1,11 +1,15 @@
 package teamdeveloper.jp.beaconater;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -17,10 +21,14 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconManager;
 
 import java.util.ArrayList;
 import java.util.List;
+
+// ToDo : Register Activityに飛ばしたりうんぬん
+// ToDo : ServiceとのActivity連携
 
 public class BeaconActivity extends AppCompatActivity {
     private ListView mListView;
@@ -29,6 +37,9 @@ public class BeaconActivity extends AppCompatActivity {
     private BeaconAdapter mBeaconAdapter;
     private List<String> beaconlist;
     //private static String TAG = "MyApp";
+
+    private BeaconReceiver bReceiver;
+    private IntentFilter intentFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +61,17 @@ public class BeaconActivity extends AppCompatActivity {
                 // 入力・編集する画面に遷移させる
             }
         });
+
+        Context context = this;
+        Intent update_service = new Intent(context , BeaconService.class);
+        startService(update_service);
+
+        bReceiver = new BeaconReceiver();
+        intentFilter = new IntentFilter();
+        intentFilter.addAction("UPDATE_ACTION");
+        registerReceiver(bReceiver, intentFilter);
+
+        bReceiver.registerHandler(updateHandler);
 
         //reloadListView();
 
@@ -75,6 +97,11 @@ public class BeaconActivity extends AppCompatActivity {
                 //mTextview.append(value+"\n");
                 //mBeacon.add(beacon);
 
+                if(beaconlist==null){
+                    mListView = (ListView) findViewById(R.id.list_view2);
+                    mBeaconAdapter = new BeaconAdapter(BeaconActivity.this);
+                    beaconlist = new ArrayList<String>();
+                }
                 ///後で有効化するようにする
                 beaconlist.add(uuid);
                 reloadListView();
@@ -85,6 +112,19 @@ public class BeaconActivity extends AppCompatActivity {
         //return mListView;
     }
 
+    // サービスから値を受け取ったら動かしたい内容を書く
+    private Handler updateHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+
+            Bundle bundle = msg.getData();
+            String message = bundle.getString("message");
+
+            Log.d("BeaconActivity", "Handler" + message);
+            //message_tv.setText(message);
+
+        }
+    };
 
     public void reloadListView() {
         // 後で他のクラスに変更する

@@ -44,7 +44,7 @@ public class StartActivity extends AppCompatActivity{
             public void onClick(View v) {
                 Snackbar.make(v, "tutorialにします", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                Intent intent = new Intent(StartActivity.this, MainActivity.class);
+                Intent intent = new Intent(StartActivity.this, SlideActivity.class);
                 // IMPORTANT: in the AndroidManifest.xml definition of this activity, you must set android:launchMode="singleInstance" or you will get two instances
                 // created when a user launches the activity manually and it gets launched from here.
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

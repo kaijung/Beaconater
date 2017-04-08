@@ -12,15 +12,16 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_centerInParent="true"
+
         />
 
     <!-- Left -->
     <Button
         android:layout_width="0dp"
+        android:text="スキップ"
         android:layout_height="wrap_content"
         android:id="@+id/Skip"
         android:background="@android:color/holo_orange_dark"
-        android:text="スキップ"
         android:textColor="@android:color/background_light"
         android:layout_centerVertical="true"
         android:layout_alignParentBottom="true"
@@ -31,6 +32,7 @@
     <!-- Right -->
     <Button
         android:id="@+id/Tutorial"
+        android:text="チュートリアル開始"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -38,7 +40,6 @@
         android:layout_alignParentRight="true"
         android:layout_alignLeft="@+id/center_view"
         android:background="@android:color/holo_blue_light"
-        android:text="チュートリアル開始"
         android:textColor="@android:color/background_light"
         />
 

@@ -24,19 +24,28 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <service android:name="BeaconService2"/>
+        <service android:name=".BeaconService2" />
 
         <receiver android:name=".BeaconNotification" />
-        <activity android:name=".StartActivity"
+
+        <activity
+            android:name=".StartActivity"
             android:label="Welcome"
-            android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".BeaconActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".BeaconActivity"
             android:label="Search Beacon"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".SlideActivity"
+            android:label="チュートリアル"
             android:theme="@style/AppTheme.NoActionBar"/>
+
     </application>
 
 </manifest>

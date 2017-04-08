@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -54,6 +55,9 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
     ArrayList<Beacon> mBeacon = new ArrayList<>();
     MainActivity mMain;
 
+    private Handler handler;
+    private BeaconService2 context;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -68,7 +72,7 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
         String IBEACON_FORMAT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
         mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
         mBeaconManager.setForegroundBetweenScanPeriod(1000);
-        mBeaconManager.setBackgroundBetweenScanPeriod(1000);
+        mBeaconManager.setBackgroundBetweenScanPeriod(10000);
 
         mRegion = new Region("", null, null, null);
         //new Region(null, null, null, null)
@@ -94,8 +98,8 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
                     Log.d("Beacon", str);
 
                     // ServiceとActivityの連携部分をやらないといけない。
-                    BeaconActivity mBeacon = new BeaconActivity();
-                    if(beacon.getId1()!=null) mBeacon.setBeacon(""+beacon.getId1());
+                    //BeaconActivity mBeacon = new BeaconActivity();
+                    //if(beacon.getId1()!=null) mBeacon.setBeacon(""+beacon.getId1());
 
 
                     /*
@@ -140,14 +144,42 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
         //mMain.reloadListView(beaconlist);
     }
 
+    public void registerHandler(Handler UpdateHandler) {
+        handler = UpdateHandler;
+    }
+
     @Override
-    public IBinder onBind(Intent intent) {
+    public IBinder onBind(Intent arg0) {
+        // TODO Auto-generated method stub
         return null;
+    }
+
+    public synchronized void sleep(long msec) {
+        try {
+            wait(msec);
+        } catch (InterruptedException e) {
+        }
+    }
+
+    protected void sendBroadCast(String message) {
+
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.putExtra("message", message);
+        broadcastIntent.setAction("UPDATE_ACTION");
+        getBaseContext().sendBroadcast(broadcastIntent);
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
+        super.onStartCommand(intent, flags, startId);
+        Log.d("UpdateService", "サービススタート");
+        sleep(4000);
+
+        String message = "さーびすからのメッセージ";
+        sendBroadCast(message);
+
+        return START_STICKY;
     }
 
     @Override
