@@ -4,7 +4,9 @@ package teamdeveloper.jp.beaconater;
  * 追加するBeaconのActivity用
  */
 
+import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Application;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
@@ -28,9 +30,25 @@ import io.realm.RealmResults;
 import static android.content.Context.ALARM_SERVICE;
 
 // ToDo: Realm使ってRegister
-// ToDo: 入力が足りないときの禁則処理s
+// ToDo: 入力が足りないときの禁則処理
 
-public class RegisterActivity {
+public class RegisterActivity extends Activity {
+
+    EditText mEdittext;
+    Button mRegister;
+    Button mCancel;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+        mEdittext = (EditText) findViewById(R.id.editName);
+        mRegister = (Button) findViewById(R.id.Register);
+        mCancel = (Button) findViewById(R.id.Cancel);
+
+        //Realm.init(this);
+    }
+
     /*
     private int mYear, mMonth, mDay, mHour, mMinute;
     private Button mDateButton, mTimeButton;

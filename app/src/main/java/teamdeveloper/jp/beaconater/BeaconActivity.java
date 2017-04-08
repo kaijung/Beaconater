@@ -43,6 +43,8 @@ public class BeaconActivity extends AppCompatActivity {
 
     private BeaconReceiver bReceiver;
     private IntentFilter intentFilter;
+    public final static String EXTRA_TASK = "teamdeveloper.jp.beaconater.BeaconDB";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,11 @@ public class BeaconActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // 入力・編集する画面に遷移させる
 
+//                BeaconDB bapp = (BeaconDB) parent.getAdapter().getItem(position);
+                Intent intent = new Intent( BeaconActivity.this, RegisterActivity.class );
+//                intent.putExtra(EXTRA_TASK, bapp.getId());
+
+                startActivity(intent);
             }
         });
 
@@ -86,7 +93,40 @@ public class BeaconActivity extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
                 // タスクを削除する
+                /*
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
+                    // タスクを削除する
+
+                    final Task task = (Task) parent.getAdapter().getItem(position);
+
+                    // ダイアログを表示する
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                    builder.setTitle("削除");
+                    builder.setMessage(task.getTitle() + "を削除しますか");
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            RealmResults<Task> results = mRealm.where(Task.class).equalTo("id", task.getId()).findAll();
+
+                            mRealm.beginTransaction();
+                            results.deleteAllFromRealm();
+                            mRealm.commitTransaction();
+
+                            reloadListView();
+                        }
+                    });
+                    builder.setNegativeButton("CANCEL", null);
+
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+
+                    return true;
+                }
+                */
                 return true;
             }
         });

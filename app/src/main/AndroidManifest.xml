@@ -12,6 +12,7 @@
 
     <application
         android:label="Beaconater"
+        android:name=".BeaconApp"
         android:allowBackup="true"
         android:icon="@mipmap/icon"
         android:roundIcon="@mipmap/icon"
@@ -39,14 +40,17 @@
             android:label="Welcome"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".SlideActivity"
+            android:label="チュートリアル"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
             android:name=".BeaconActivity"
             android:label="Search Beacon"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".SlideActivity"
-            android:label="チュートリアル"
+            android:name=".RegisterActivity"
+            android:label="登録"
             android:theme="@style/AppTheme.NoActionBar"/>
-
     </application>
 
 </manifest>

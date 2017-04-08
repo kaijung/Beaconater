@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="18dp"
+        android:text="Beaconデバイス"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/textUUID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/textView"
+        android:layout_below="@+id/textView"
+        android:text="UUID"
+        android:textColor="@android:color/darker_gray" />
+
+    <TextView
+        android:id="@+id/textDevice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/textUUID"
+        android:layout_below="@+id/textUUID"
+        android:layout_marginTop="16dp"
+        android:text="デバイス名"
+        android:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/editName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/switch1"
+        android:layout_alignStart="@+id/textDevice"
+        android:layout_below="@+id/textDevice"
+        android:hint="デバイス名を入力"
+        android:inputType="textPersonName"
+        android:textSize="14sp" />
+
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="23dp"
+        android:layout_below="@+id/editName"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="35dp" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/switch1"
+        android:layout_alignStart="@+id/editName"
+        android:layout_alignTop="@+id/switch1"
+        android:layout_toStartOf="@+id/switch1"
+        android:text="通知設定"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/textView6"
+        android:layout_below="@+id/textView6"
+        android:textSize="10sp"
+        android:text="通知エリアにデバイスに関する情報が表示されます"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/textView7"
+        android:layout_below="@+id/textView7"
+        android:layout_marginTop="18dp"
+        android:text="デバイスエリア設定"
+        android:textSize="18sp" />
+
+    <RadioGroup
+        android:id="@+id/radiogroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/textView8"
+        android:layout_below="@+id/textView8"
+        android:layout_alignParentEnd="true" >
+        <RadioButton
+            android:id="@+id/radioIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="検出可能なエリアに入ったら通知"
+            />
+        <RadioButton
+            android:id="@+id/radioOut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="検出可能なエリアから出たら通知"/>
+    </RadioGroup>
+
+    <!-- 空の View -->
+    <View
+        android:id="@+id/center_view3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true"
+
+        />
+
+    <!-- Left -->
+    <Button
+        android:id="@+id/Cancel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignRight="@+id/center_view3"
+        android:layout_centerVertical="true"
+        android:background="@android:color/holo_red_dark"
+        android:text="キャンセル"
+        android:textColor="@android:color/background_light" />
+
+    <!-- Right -->
+    <Button
+        android:id="@+id/Register"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/center_view3"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="@color/colorPrimaryDark"
+        android:text="登録"
+        android:textColor="@android:color/background_light" />
+
+</RelativeLayout>

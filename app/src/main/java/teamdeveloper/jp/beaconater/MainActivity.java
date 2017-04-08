@@ -1,6 +1,7 @@
 package teamdeveloper.jp.beaconater;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -45,7 +46,7 @@ import java.util.List;
 // Todo : BeaconAdapterはListView用
 // ToDo : Subtitle用も設定しないと
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends Activity {
     //TextView mTextview;
     private ListView mListView;
     private BeaconManager mBeaconManager;
