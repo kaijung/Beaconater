@@ -94,6 +94,7 @@
             android:id="@+id/radioIn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:checked="true"
             android:text="検出可能なエリアに入ったら通知"
             />
         <RadioButton

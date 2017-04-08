@@ -1,6 +1,7 @@
 package teamdeveloper.jp.beaconater;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,20 +13,20 @@ import java.util.List;
 
 public class BeaconAdapter extends BaseAdapter {
     private LayoutInflater mLayoutInflater;
-    private ArrayList<BeaconDB> mBeaconList;
+    private List<BeaconDB> mBeaconList;
 
     public BeaconAdapter(Context context) {
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public void setBeaconList(ArrayList<BeaconDB> beaconList) {
+    public void setBeaconList(List<BeaconDB> beaconList) {
         mBeaconList = beaconList;
     }
 
     @Override
     public int getCount() {
         //return mBeaconList.size();
-        return 0;
+        return mBeaconList.size();
     }
 
     @Override
@@ -35,7 +36,7 @@ public class BeaconAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return mBeaconList.get(position).getId();
     }
 
     @Override
@@ -47,9 +48,22 @@ public class BeaconAdapter extends BaseAdapter {
         TextView textView1 = (TextView) convertView.findViewById(android.R.id.text1);
         TextView textView2 = (TextView) convertView.findViewById(android.R.id.text2);
 
+        Log.d("Adapter",mBeaconList.get(position).getDevice());
+        Log.d("Adapter",mBeaconList.get(position).getUuid());
+
         // 後でBeaconクラスから情報を取得するように変更する
         textView1.setText(mBeaconList.get(position).getDevice());
-        textView2.setText(mBeaconList.get(position).getUuid());
+
+        String notify;
+        String range;
+        if(mBeaconList.get(position).getNotify()){
+            notify = "ON";
+        }else{
+            notify = "OFF";
+        }
+
+
+        textView2.setText(mBeaconList.get(position).getUuid()+" 通知:"+notify+" "+mBeaconList.get(position).getRegion()+"時");
 
         return convertView;
     }

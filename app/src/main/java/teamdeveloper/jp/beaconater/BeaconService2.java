@@ -39,6 +39,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+//ToDo: Local Broadcast http://www.programing-style.com/android/android-api/android-localbroadcastmanager/
+
+
 public class BeaconService2 extends Service implements BootstrapNotifier {
 
     private BeaconManager mBeaconManager;
@@ -47,6 +50,7 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
     //任意のBeaconを指定するのに便利
     private Region mRegion;
     private RegionBootstrap regionBootstrap;
+
 
     //TextView mTextview1;
     //TextView mTextview2;
@@ -202,24 +206,27 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         */
-        Intent resultIntent = new Intent(getApplicationContext(), BeaconNotification.class);
-        PendingIntent resultPendingIntent = PendingIntent.getBroadcast(
-                this,
-                0,
-                resultIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
+
+        /*
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
 
         builder.setSmallIcon(R.mipmap.icon);
 
         NotificationManagerCompat manager = NotificationManagerCompat.from(getApplicationContext());
         manager.notify(0, builder.build());
+        */
+
+        //sendBroadCast(BroadcastReceiverService.BROADCAST_DIDENTER);
 
         // 領域への入場を検知
         // レンジングの開始
         try {
             mBeaconManager.startRangingBeaconsInRegion(region);
+            Intent broadcastIntent = new Intent();
+            broadcastIntent.putExtra("Registered", "登録されているUUID");
+
+            broadcastIntent.setAction(BroadcastReceiverService.BROADCAST_DIDENTER);
+            getBaseContext().sendBroadcast(broadcastIntent);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

@@ -52,7 +52,7 @@ import io.realm.Sort;
 // ToDo : Subtitle用も設定しないと
 
 public class MainActivity extends Activity {
-    public final static String EXTRA_TASK = "teamdeveloper.jp.beaconater.Beacon";
+    public final static String EXTRA_TASK = "teamdeveloper.jp.beaconater.BeaconDB";
 
     //TextView mTextview;
     private ListView mListView;
@@ -64,6 +64,7 @@ public class MainActivity extends Activity {
     //Sharedプリファレンス
     private SharedPreferences preference;
     private SharedPreferences.Editor editor;
+
     private Realm mRealm;
     private RealmChangeListener mRealmListener = new RealmChangeListener() {
         @Override
@@ -87,6 +88,7 @@ public class MainActivity extends Activity {
         mRealm = Realm.getDefaultInstance();
         mRealm.addChangeListener(mRealmListener);
 
+        mBeaconAdapter = new BeaconAdapter(MainActivity.this);
 
         // ListViewの設定
         mListView = (ListView) findViewById(R.id.list_view);
@@ -97,7 +99,7 @@ public class MainActivity extends Activity {
         boolean dataBoolean = preference.getBoolean("DataBoolean", false);
         //作成途中 : data.getStringSet()
 
-        if(preference.getBoolean("DataBoolean", false)==false) {
+        if(dataBoolean==false) {
             Log.d("AppLaunchChecker","はじめてアプリを起動した");
 
             Intent intent = new Intent(this, StartActivity.class);
@@ -197,7 +199,11 @@ public class MainActivity extends Activity {
             }
         });
 
-        //reloadListView();
+
+        // アプリ起動時に表示テスト用のタスクを作成する
+        addBeaconForTest();
+
+        reloadListView();
 
         editor.putBoolean("DataBoolean", true);
         editor.commit();
@@ -206,16 +212,32 @@ public class MainActivity extends Activity {
 
     public void reloadListView() {
         // Raalmデータベースから、「全てのデータを取得して新しい日時順に並べた結果」を取得
-        RealmResults<BeaconDB> beaconRealmResults = mRealm.where(BeaconDB.class).findAllSorted("date", Sort.DESCENDING);
+        RealmResults<BeaconDB> beaconRealmResults = mRealm.where(BeaconDB.class).findAllSorted("id", Sort.DESCENDING);
+        //.findAllSorted("Id", Sort.DESCENDING)
         // 上記の結果を、TaskList としてセットする
         mBeaconAdapter.setBeaconList(mRealm.copyFromRealm(beaconRealmResults));
+        Log.d("RealmTest",mRealm.toString());
+        Log.d("RealmTest",mBeaconAdapter.toString());
 
-        Log.d("reloadListView","ここまで動いているよー");
+
+        //Log.d("reloadListView","ここまで動いているよー");
 
         //mBeaconAdapter.setBeaconList(beaconlist);
         mListView.setAdapter(mBeaconAdapter);
         mBeaconAdapter.notifyDataSetChanged();
 
+    }
+
+    private void addBeaconForTest() {
+        BeaconDB bdb = new BeaconDB();
+        bdb.setDevice("作業");
+        bdb.setUuid("プログラムを書いてPUSHする");
+        bdb.setNotify(true);
+        bdb.setRegion("OUT");
+        bdb.setId(0);
+        mRealm.beginTransaction();
+        mRealm.copyToRealmOrUpdate(bdb);
+        mRealm.commitTransaction();
     }
 
     @Override

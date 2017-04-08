@@ -12,134 +12,156 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.TimePicker;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Switch;
+import android.widget.TextView;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-import static android.content.Context.ALARM_SERVICE;
 
 // ToDo: Realm使ってRegister
 // ToDo: 入力が足りないときの禁則処理
 
-public class RegisterActivity extends Activity {
+public class RegisterActivity extends Activity implements CompoundButton.OnCheckedChangeListener {
 
+    TextView mTextview;
     EditText mEdittext;
     Button mRegister;
     Button mCancel;
+    RadioButton mInRadio;
+    RadioButton mOutRadio;
+    RadioGroup mRadioGroup;
+    Switch mSwitch;
+
+    String str_radio;
+    Boolean b_switch;
+
+    private BeaconDB mBeacon;
+
+    private View.OnClickListener mOnDoneClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //Log.d("AddTtask","登録が押されました");
+            if(mEdittext.getText().toString().equals("")==true){
+                Snackbar.make(v, "デバイス名を入力して下さい", Snackbar.LENGTH_LONG).show();
+
+            }else {
+                addTask();
+                finish();
+            }
+        }
+    };
+
+    private View.OnClickListener mOnCancelClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //addTask();
+            finish();
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        mEdittext = (EditText) findViewById(R.id.editName);
-        mRegister = (Button) findViewById(R.id.Register);
-        mCancel = (Button) findViewById(R.id.Cancel);
-
-        //Realm.init(this);
-    }
-
-    /*
-    private int mYear, mMonth, mDay, mHour, mMinute;
-    private Button mDateButton, mTimeButton;
-    private EditText mTitleEdit, mContentEdit;
-    private Task mTask;
-    private View.OnClickListener mOnDateClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(InputActivity.this,
-                    new DatePickerDialog.OnDateSetListener() {
-                        @Override
-                        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                            mYear = year;
-                            mMonth = monthOfYear;
-                            mDay = dayOfMonth;
-                            String dateString = mYear + "/" + String.format("%02d",(mMonth + 1)) + "/" + String.format("%02d", mDay);
-                            mDateButton.setText(dateString);
-                        }
-                    }, mYear, mMonth, mDay);
-            datePickerDialog.show();
-        }
-    };
-
-    private View.OnClickListener mOnTimeClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            TimePickerDialog timePickerDialog = new TimePickerDialog(InputActivity.this,
-                    new TimePickerDialog.OnTimeSetListener() {
-                        @Override
-                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                            mHour = hourOfDay;
-                            mMinute = minute;
-                            String timeString = String.format("%02d", mHour) + ":" + String.format("%02d", mMinute);
-                            mTimeButton.setText(timeString);
-                        }
-                    }, mHour, mMinute, false);
-            timePickerDialog.show();
-        }
-    };
-
-    private View.OnClickListener mOnDoneClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            addTask();
-            finish();
-        }
-    };
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_input);
-
-        // ActionBarを設定する
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
 
         // UI部品の設定
-        mDateButton = (Button)findViewById(R.id.date_button);
-        mDateButton.setOnClickListener(mOnDateClickListener);
-        mTimeButton = (Button)findViewById(R.id.times_button);
-        mTimeButton.setOnClickListener(mOnTimeClickListener);
-        findViewById(R.id.done_button).setOnClickListener(mOnDoneClickListener);
-        mTitleEdit = (EditText)findViewById(R.id.title_edit_text);
-        mContentEdit = (EditText)findViewById(R.id.content_edit_text);
+        mTextview = (TextView) findViewById(R.id.textUUID);
+        mEdittext = (EditText) findViewById(R.id.editName);
+        mRegister = (Button) findViewById(R.id.Register);
+        mRegister.setOnClickListener(mOnDoneClickListener);
+        mCancel = (Button) findViewById(R.id.Cancel);
+        mCancel.setOnClickListener(mOnCancelClickListener);
+        mSwitch = (Switch) findViewById(R.id.switch1);
+        mSwitch.setOnCheckedChangeListener(this);
 
-        // EXTRA_TASK から Task の id を取得して、 id から Task のインスタンスを取得する
+        //mSwitch.setOnClickListener(onSwitchClicked);
+
+        //radioGroupとリソースのradioGroupを結び付ける
+        mRadioGroup = (RadioGroup) findViewById(R.id.radiogroup);
+
+        mInRadio = (RadioButton) findViewById(R.id.radioIn);
+        mOutRadio = (RadioButton) findViewById(R.id.radioOut);
+        //ラジオグループ内のチェックが変更された時に呼び出すコールバックリスナーを登録
+        mRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            /**
+             * onCheckedChanged
+             * ラジオボタンがチェックされた時の処理
+             */
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                //mRadioButtonとチェックが変更された時のチェックボタンを結び付ける
+                Log.d("CheckRadioButton",""+checkedId);
+                switch(checkedId) {
+                    case R.id.radioIn:
+                        mInRadio.setChecked(true);
+                        Log.d("CheckRadioButton","IN");
+
+                        str_radio="IN";
+                        break;
+                    case R.id.radioOut:
+                        mOutRadio.setChecked(true);
+                        Log.d("CheckRadioButton","OUT");
+                        str_radio="OUT";
+                        break;
+                }
+                //トースト表示
+                //Toast.makeText(MainActivity.this, mRadioButton.getText()+"が選択されました。", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //findViewById(R.id.Register).setOnClickListener(mOnDoneClickListener);
+        //findViewById(R.id.Cancel).setOnClickListener(mOnDoneClickListener);
+
+
+        // EXTRA_TASK から Beacon の id を取得して、 id から Beacon のインスタンスを取得する
         Intent intent = getIntent();
-        int taskId = intent.getIntExtra(MainActivity.EXTRA_TASK, -1);
+        int beaconId = intent.getIntExtra(MainActivity.EXTRA_TASK, -1);
         Realm realm = Realm.getDefaultInstance();
-        mTask = realm.where(Task.class).equalTo("id", taskId).findFirst();
+        mBeacon = realm.where(BeaconDB.class).equalTo("id", beaconId).findFirst();
         realm.close();
 
-        if (mTask == null) {
+        if (mBeacon == null) {
             // 新規作成の場合
-            Calendar calendar = Calendar.getInstance();
+/*            Calendar calendar = Calendar.getInstance();
             mYear = calendar.get(Calendar.YEAR);
             mMonth = calendar.get(Calendar.MONTH);
             mDay = calendar.get(Calendar.DAY_OF_MONTH);
             mHour = calendar.get(Calendar.HOUR_OF_DAY);
-            mMinute = calendar.get(Calendar.MINUTE);
+            mMinute = calendar.get(Calendar.MINUTE);*/
+
+            //mSwitch.setChecked(true);
+            str_radio = "OUT";
+            b_switch = true;
+
         } else {
             // 更新の場合
-            mTitleEdit.setText(mTask.getTitle());
-            mContentEdit.setText(mTask.getContents());
+            mTextview.setText(mBeacon.getUuid());
+            mEdittext.setText(mBeacon.getDevice());
+            str_radio = mBeacon.getRegion();
+            if(str_radio.equals("OUT")){
+                mOutRadio.setChecked(true);
+                mInRadio.setChecked(false);
+            }else{
+                mOutRadio.setChecked(false);
+                mInRadio.setChecked(true);
+            }
+            b_switch = mBeacon.getNotify();
+            mSwitch.setChecked(b_switch);
 
+            /*
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(mTask.getDate());
+            calendar.setTime(mBeacon.getDate());
             mYear = calendar.get(Calendar.YEAR);
             mMonth = calendar.get(Calendar.MONTH);
             mDay = calendar.get(Calendar.DAY_OF_MONTH);
@@ -148,55 +170,69 @@ public class RegisterActivity extends Activity {
 
             String dateString = mYear + "/" + String.format("%02d",(mMonth + 1)) + "/" + String.format("%02d", mDay);
             String timeString = String.format("%02d", mHour) + ":" + String.format("%02d", mMinute);
-            mDateButton.setText(dateString);
+            mRegister.setText(dateString);
             mTimeButton.setText(timeString);
+            */
         }
     }
+
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        Log.d("SwtichOnOff",""+isChecked);
+        if (isChecked == true) { // ON状態になったとき
+            b_switch=true;
+            //Toast.makeText(getApplicationContext(), "SwitchがONになりました。", Toast.LENGTH_SHORT).show();
+        }else{
+            b_switch=false;
+        }
+    }
+
 
     private void addTask() {
         Realm realm = Realm.getDefaultInstance();
 
         realm.beginTransaction();
 
-        if (mTask == null) {
+        if (mBeacon == null) {
             // 新規作成の場合
-            mTask = new Task();
+            mBeacon = new BeaconDB();
 
-            RealmResults<Task> taskRealmResults = realm.where(Task.class).findAll();
+            RealmResults<BeaconDB> beaconRealmResults = realm.where(BeaconDB.class).findAll();
 
             int identifier;
-            if (taskRealmResults.max("id") != null) {
-                identifier = taskRealmResults.max("id").intValue() + 1;
+            if (beaconRealmResults.max("id") != null) {
+                identifier = beaconRealmResults.max("id").intValue() + 1;
             } else {
                 identifier = 0;
             }
-            mTask.setId(identifier);
+            mBeacon.setId(identifier);
         }
 
-        String title = mTitleEdit.getText().toString();
-        String content = mContentEdit.getText().toString();
+        String uuid = mTextview.getText().toString();
+        String device = mEdittext.getText().toString();
 
-        mTask.setTitle(title);
-        mTask.setContents(content);
-        GregorianCalendar calendar = new GregorianCalendar(mYear,mMonth,mDay,mHour,mMinute);
-        Date date = calendar.getTime();
-        mTask.setDate(date);
+        mBeacon.setUuid(uuid);
+        mBeacon.setDevice(device);
+        mBeacon.setNotify(b_switch);
+        mBeacon.setRegion(str_radio);
+        Log.d("RealmRegister",uuid+" "+device+" "+b_switch+" "+str_radio+" ");
 
-        realm.copyToRealmOrUpdate(mTask);
+        realm.copyToRealmOrUpdate(mBeacon);
         realm.commitTransaction();
 
         realm.close();
 
-        Intent resultIntent = new Intent(getApplicationContext(), TaskAlarmReceiver.class);
-        resultIntent.putExtra(MainActivity.EXTRA_TASK, mTask.getId());
+        /* 今回はアラームマネージャ関係なしなのでOK
+        Intent resultIntent = new Intent(getApplicationContext(), BroadcastReceiverService.class);
+        resultIntent.putExtra(MainActivity.EXTRA_TASK, mBeacon.getId());
         PendingIntent resultPendingIntent = PendingIntent.getBroadcast(
                 this,
-                mTask.getId(),
+                mBeacon.getId(),
                 resultIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT
         );
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), resultPendingIntent);
-    }*/
+        */
+    }
 }

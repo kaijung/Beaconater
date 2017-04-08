@@ -196,7 +196,7 @@ public class BeaconActivity extends AppCompatActivity {
         //beaconlist.add("aaa");
         //beaconlist.add();
 
-        Log.d("reloadListView","ここまで動いているよー");
+        Log.d("reloadListView","動いている");
 
         //mBeaconAdapter.setBeaconList(beaconlist);
         mListView.setAdapter(mBeaconAdapter);
@@ -216,7 +216,7 @@ public class BeaconActivity extends AppCompatActivity {
 
 */
                 ///後で有効化するようにする
-                //beaconlist.add(uuid);
+                beaconlist.add(uuid);
                 reloadListView();
         /*
             }
@@ -247,14 +247,14 @@ public class BeaconActivity extends AppCompatActivity {
     protected void onStop()
     {
         super.onStop();
-        unregisterReceiver(bReceiver);
+        //unregisterReceiver(bReceiver);
     }
 
     @Override
     protected void onDestroy()
     {
         super.onDestroy();
-        //unregisterReceiver(bReceiver);
+        unregisterReceiver(bReceiver);
     }
 
     @Override
