@@ -32,6 +32,7 @@ import java.util.List;
 
 // ToDo : Register Activityに飛ばしたりうんぬん
 // ToDo : ServiceとのActivity連携
+// ToDo : Beaconがない場合の表示
 
 public class BeaconActivity extends AppCompatActivity {
     private ListView mListView;
@@ -76,16 +77,13 @@ public class BeaconActivity extends AppCompatActivity {
         Context context = this;
         Intent update_service = new Intent(context , BeaconService.class);
         startService(update_service);
-
         bReceiver = new BeaconReceiver();
         intentFilter = new IntentFilter();
         intentFilter.addAction("UPDATE_ACTION");
         registerReceiver(bReceiver, intentFilter);
 
         bReceiver.registerHandler(updateHandler);
-
-
-        //reloadListView();
+         //reloadListView();
 
         // ListViewを長押ししたときの処理
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -200,7 +198,7 @@ public class BeaconActivity extends AppCompatActivity {
 
         Log.d("reloadListView","ここまで動いているよー");
 
-        mBeaconAdapter.setBeaconList(beaconlist);
+        //mBeaconAdapter.setBeaconList(beaconlist);
         mListView.setAdapter(mBeaconAdapter);
         mBeaconAdapter.notifyDataSetChanged();
 
@@ -218,7 +216,7 @@ public class BeaconActivity extends AppCompatActivity {
 
 */
                 ///後で有効化するようにする
-                beaconlist.add(uuid);
+                //beaconlist.add(uuid);
                 reloadListView();
         /*
             }
@@ -236,6 +234,27 @@ public class BeaconActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         mBeaconAdapter = new BeaconAdapter(this);
+    }
+
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onStop()
+    {
+        super.onStop();
+        unregisterReceiver(bReceiver);
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        //unregisterReceiver(bReceiver);
     }
 
     @Override

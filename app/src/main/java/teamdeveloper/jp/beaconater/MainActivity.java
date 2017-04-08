@@ -40,6 +40,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmResults;
+import io.realm.Sort;
+
 // 新規プロジェクトを作成してバックグラウンドのみの処理にしたものを試す
 // didEnterのみしか検出
 // Todo : MainActivityは登録されたBeaconだけが表示されるクラス
@@ -47,16 +52,25 @@ import java.util.List;
 // ToDo : Subtitle用も設定しないと
 
 public class MainActivity extends Activity {
+    public final static String EXTRA_TASK = "teamdeveloper.jp.beaconater.Beacon";
+
     //TextView mTextview;
     private ListView mListView;
     private BeaconManager mBeaconManager;
     private static final int PERMISSIONS_REQUEST_CODE = 1;
     private BeaconAdapter mBeaconAdapter;
+
     //private List<String> beaconlist;
     //Sharedプリファレンス
     private SharedPreferences preference;
     private SharedPreferences.Editor editor;
-
+    private Realm mRealm;
+    private RealmChangeListener mRealmListener = new RealmChangeListener() {
+        @Override
+        public void onChange(Object element) {
+            reloadListView();
+        }
+    };
 
     private static String TAG = "MyApp";
 
@@ -69,6 +83,9 @@ public class MainActivity extends Activity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         */
+        // Realmの設定
+        mRealm = Realm.getDefaultInstance();
+        mRealm.addChangeListener(mRealmListener);
 
 
         // ListViewの設定
@@ -108,7 +125,6 @@ public class MainActivity extends Activity {
                 }
             }
             //startService(new Intent(MainActivity.this, BeaconService2.class));
-
         }
 
         // ListViewをタップしたときの処理
@@ -117,6 +133,12 @@ public class MainActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // 入力・編集する画面に遷移させる
+                BeaconDB beacon = (BeaconDB) parent.getAdapter().getItem(position);
+
+                Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+                intent.putExtra(EXTRA_TASK, beacon.getId());
+
+                startActivity(intent);
             }
         });
 
@@ -128,6 +150,31 @@ public class MainActivity extends Activity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
                 // タスクを削除する
+
+                final BeaconDB beacon = (BeaconDB) parent.getAdapter().getItem(position);
+
+                // ダイアログを表示する
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                builder.setTitle("削除");
+                builder.setMessage(beacon.getDevice() + "を削除しますか");
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        RealmResults<BeaconDB> results = mRealm.where(BeaconDB.class).equalTo("id", beacon.getId()).findAll();
+
+                        mRealm.beginTransaction();
+                        results.deleteAllFromRealm();
+                        mRealm.commitTransaction();
+
+                        reloadListView();
+                    }
+                });
+                builder.setNegativeButton("CANCEL", null);
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
 
                 return true;
             }
@@ -150,8 +197,24 @@ public class MainActivity extends Activity {
             }
         });
 
+        //reloadListView();
+
         editor.putBoolean("DataBoolean", true);
         editor.commit();
+
+    }
+
+    public void reloadListView() {
+        // Raalmデータベースから、「全てのデータを取得して新しい日時順に並べた結果」を取得
+        RealmResults<BeaconDB> beaconRealmResults = mRealm.where(BeaconDB.class).findAllSorted("date", Sort.DESCENDING);
+        // 上記の結果を、TaskList としてセットする
+        mBeaconAdapter.setBeaconList(mRealm.copyFromRealm(beaconRealmResults));
+
+        Log.d("reloadListView","ここまで動いているよー");
+
+        //mBeaconAdapter.setBeaconList(beaconlist);
+        mListView.setAdapter(mBeaconAdapter);
+        mBeaconAdapter.notifyDataSetChanged();
 
     }
 
@@ -169,22 +232,6 @@ public class MainActivity extends Activity {
                 break;
         }
     }
-
-    //そのままSetTextするとエラーが起きたのでStackOverflowより
-    private void setText(final String name, final String uuid){
-        runOnUiThread(new Runnable(){
-            @Override
-            public void run() {
-                //mTextview.append(value+"\n");
-                //mBeacon.add(beacon);
-
-                ///後で有効化するようにする
-                //beaconlist.add(uuid);
-                //reloadListView();
-            }
-        });
-    }
-
 
     @Override
     protected void onPause() {

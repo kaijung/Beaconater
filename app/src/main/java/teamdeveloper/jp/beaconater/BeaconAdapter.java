@@ -7,23 +7,25 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BeaconAdapter extends BaseAdapter {
     private LayoutInflater mLayoutInflater;
-    private List<String> mBeaconList;
+    private ArrayList<BeaconDB> mBeaconList;
 
     public BeaconAdapter(Context context) {
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public void setBeaconList(List<String> beaconList) {
+    public void setBeaconList(ArrayList<BeaconDB> beaconList) {
         mBeaconList = beaconList;
     }
 
     @Override
     public int getCount() {
-        return mBeaconList.size();
+        //return mBeaconList.size();
+        return 0;
     }
 
     @Override
@@ -46,8 +48,8 @@ public class BeaconAdapter extends BaseAdapter {
         TextView textView2 = (TextView) convertView.findViewById(android.R.id.text2);
 
         // 後でBeaconクラスから情報を取得するように変更する
-        textView1.setText(mBeaconList.get(position));
-        textView2.setText(mBeaconList.get(position));
+        textView1.setText(mBeaconList.get(position).getDevice());
+        textView2.setText(mBeaconList.get(position).getUuid());
 
         return convertView;
     }

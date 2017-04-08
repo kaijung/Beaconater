@@ -7,36 +7,45 @@ import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
 public class BeaconDB  extends RealmObject implements Serializable {
-    private String title; // タイトル
-    private String contents; // 内容
-    private Date date; // 日時
+    private String device; // タイトル
+    private String uuid; // 内容
+    private Boolean notify; // Notify ON/OFF設定
+    private String region; // Region
 
     // id をプライマリーキーとして設定
     @PrimaryKey
     private int id;
 
-    public String getTitle() {
-        return title;
+    public String getDevice() {
+        return device;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setDevice(String device) {
+        this.device = device;
     }
 
-    public String getContents() {
-        return contents;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setContents(String contents) {
-        this.contents = contents;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
-    public Date getDate() {
-        return date;
+    public Boolean getNotify() {
+        return notify;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setNotify(Boolean notify) {
+        this.notify = notify;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public int getId() {

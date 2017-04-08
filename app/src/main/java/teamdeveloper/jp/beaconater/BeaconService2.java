@@ -144,7 +144,7 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
 
         ///後で有効化するようにする
         beaconlist.add(uuid);
-        mBeaconAdapter.setBeaconList(beaconlist);
+        //mBeaconAdapter.setBeaconList(beaconlist);
         //mListView.setAdapter(mBeaconAdapter);
         mBeaconAdapter.notifyDataSetChanged();
         //mMain.reloadListView(beaconlist);
@@ -189,6 +189,7 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d("BeaconService2","onDestroyされました。");
     }
 
 
