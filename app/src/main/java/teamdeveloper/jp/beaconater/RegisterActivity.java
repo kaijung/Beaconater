@@ -126,6 +126,7 @@ public class RegisterActivity extends Activity implements CompoundButton.OnCheck
 
         // EXTRA_TASK から Beacon の id を取得して、 id から Beacon のインスタンスを取得する
         Intent intent = getIntent();
+        String uuid = intent.getStringExtra(MainActivity.EXTRA_TASK+"UUID");
         int beaconId = intent.getIntExtra(MainActivity.EXTRA_TASK, -1);
         Realm realm = Realm.getDefaultInstance();
         mBeacon = realm.where(BeaconDB.class).equalTo("id", beaconId).findFirst();
@@ -141,6 +142,7 @@ public class RegisterActivity extends Activity implements CompoundButton.OnCheck
             mMinute = calendar.get(Calendar.MINUTE);*/
 
             //mSwitch.setChecked(true);
+            mTextview.setText(uuid);
             str_radio = "OUT";
             b_switch = true;
 

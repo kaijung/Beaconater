@@ -61,9 +61,12 @@ public class BeaconAdapter extends BaseAdapter {
         }else{
             notify = "OFF";
         }
+        if(mBeaconList.get(position).getRegion().equals("")){
+            textView2.setText(mBeaconList.get(position).getUuid());
+        }else{
+            textView2.setText(mBeaconList.get(position).getUuid()+" 通知:"+notify+" "+mBeaconList.get(position).getRegion()+"時");
+        }
 
-
-        textView2.setText(mBeaconList.get(position).getUuid()+" 通知:"+notify+" "+mBeaconList.get(position).getRegion()+"時");
 
         return convertView;
     }

@@ -231,7 +231,7 @@ public class MainActivity extends Activity {
     private void addBeaconForTest() {
         BeaconDB bdb = new BeaconDB();
         bdb.setDevice("作業");
-        bdb.setUuid("プログラムを書いてPUSHする");
+        bdb.setUuid("2f234454-cf6d-4a0f-adf2-f4911ba9ffa6");
         bdb.setNotify(true);
         bdb.setRegion("OUT");
         bdb.setId(0);

@@ -30,6 +30,10 @@ import org.altbeacon.beacon.BeaconManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
+import io.realm.Sort;
+
 // ToDo : Register Activityに飛ばしたりうんぬん
 // ToDo : ServiceとのActivity連携
 // ToDo : Beaconがない場合の表示
@@ -41,11 +45,13 @@ public class BeaconActivity extends AppCompatActivity {
     private BeaconAdapter mBeaconAdapter;
     private List<String> beaconlist;
     //private static String TAG = "MyApp";
+    private BeaconDB mBeacon;
+    private List<BeaconDB> mBeaconList;
+    private Realm mRealm;
 
     private BeaconReceiver bReceiver;
     private IntentFilter intentFilter;
-    public final static String EXTRA_TASK = "teamdeveloper.jp.beaconater.BeaconDB";
-
+    private RealmResults<BeaconDB> beaconRealmResults;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +60,26 @@ public class BeaconActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
 
+        // Realmの設定
+        mRealm = Realm.getDefaultInstance();
+        mBeaconAdapter = new BeaconAdapter(BeaconActivity.this);
+        beaconRealmResults = mRealm.where(BeaconDB.class).findAllSorted("id", Sort.DESCENDING);
+        // 上記の結果を、TaskList としてセットする
+        //mBeaconAdapter.setBeaconList(mRealm.copyFromRealm(beaconRealmResults));
+        //mBeaconList = new List<BeaconDB>;
+        mBeaconList = new ArrayList<>();
+        mBeacon = new BeaconDB();
+        mBeacon.setId(0);
+        mBeacon.setUuid("");
+        mBeacon.setDevice("");
+        mBeacon.setRegion("");
+        mBeacon.setNotify(false);
+
         // ListViewの設定
         mListView = (ListView) findViewById(R.id.list_view2);
 
-        mBeaconAdapter = new BeaconAdapter(this);
-        beaconlist = new ArrayList<String>();
+        //mBeaconAdapter = new BeaconAdapter(this);
+        //beaconlist = new ArrayList<String>();
 
         // ListViewをタップしたときの処理
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -66,8 +87,11 @@ public class BeaconActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // 入力・編集する画面に遷移させる
 
-//                BeaconDB bapp = (BeaconDB) parent.getAdapter().getItem(position);
+                BeaconDB beacon = (BeaconDB) parent.getAdapter().getItem(position);
                 Intent intent = new Intent( BeaconActivity.this, RegisterActivity.class );
+                intent.putExtra(MainActivity.EXTRA_TASK+"UUID", beacon.getUuid());
+                intent.putExtra(MainActivity.EXTRA_TASK, parent.getCount());
+
 //                intent.putExtra(EXTRA_TASK, bapp.getId());
 
                 startActivity(intent);
@@ -83,55 +107,12 @@ public class BeaconActivity extends AppCompatActivity {
         registerReceiver(bReceiver, intentFilter);
 
         bReceiver.registerHandler(updateHandler);
-         //reloadListView();
-
-        // ListViewを長押ししたときの処理
-        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
-                // タスクを削除する
-                /*
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    // タスクを削除する
-
-                    final Task task = (Task) parent.getAdapter().getItem(position);
-
-                    // ダイアログを表示する
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-                    builder.setTitle("削除");
-                    builder.setMessage(task.getTitle() + "を削除しますか");
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            RealmResults<Task> results = mRealm.where(Task.class).equalTo("id", task.getId()).findAll();
-
-                            mRealm.beginTransaction();
-                            results.deleteAllFromRealm();
-                            mRealm.commitTransaction();
-
-                            reloadListView();
-                        }
-                    });
-                    builder.setNegativeButton("CANCEL", null);
-
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-
-                    return true;
-                }
-                */
-                return true;
-            }
-        });
+        //reloadListView();
 
         startService(new Intent(BeaconActivity.this, BeaconService2.class));
     }
 
+    /*
     public void setBeacon(final String uuid) {
         runOnUiThread(new Runnable(){
             @Override
@@ -153,7 +134,7 @@ public class BeaconActivity extends AppCompatActivity {
         //beaconlist.add(uuid);
         //reloadListView();
         //return mListView;
-    }
+    }*/
 
     // サービスから値を受け取ったら動かしたい内容を書く
     private Handler updateHandler = new Handler() {
@@ -164,26 +145,34 @@ public class BeaconActivity extends AppCompatActivity {
             String message = bundle.getString("message");
             String uuid = bundle.getString("message");
 
-            Log.d("BeaconActivity", "Handler" + message);
+            Log.d("BeaconActivity", "Handler : " + message);
             ///後で有効化するようにする
+            Log.d("BeaconActivity",""+beaconRealmResults.size());
 
-            if (beaconlist.size() == 0){
-                 setText("No Name",uuid);
-             } else if (beaconlist.size() > 0) {
+            if (mBeaconList.size() == 0){
+                 setText("未登録",uuid);
+             } else {
                 Boolean mBoolean = false;
-                if(mBeaconAdapter!=null) {
-                    for (int i = 0; i < beaconlist.size(); i++) {
-                        if (mBeaconAdapter.getItem(i).equals(uuid) == true) {
-                            Log.d("Beaconater", "ちゃんと見てます");
+                for (int i = 0; i < mBeaconList.size(); i++) {
+                    if (mBeaconList.get(i).getUuid().equals(uuid)) {
+                        Log.d("Beaconater", "ちゃんと見てます1");
+                        mBoolean = true;
+                    }
+                }
+                if(mBoolean==false&&beaconRealmResults.size()>0) {
+                    for (int j = 0; j < beaconRealmResults.size(); j++) {
+                        if (beaconRealmResults.get(j).getUuid().equals(uuid)) {
+                            Log.d("Beaconater", "ちゃんと見てます2");
                             mBoolean = true;
                         }
                     }
                 }
-                if(mBoolean == false) {
-                    setText("No Name",uuid);
+                if(!mBoolean) {
+                    setText("未登録",uuid);
                 }
             }
-            //beaconlist.add(uuid);
+            //mBeacon.setUuid(uuid);
+            //mBeaconList.add(mBeacon);
             //reloadListView();
             //message_tv.setText(message);
 
@@ -198,7 +187,7 @@ public class BeaconActivity extends AppCompatActivity {
 
         Log.d("reloadListView","動いている");
 
-        //mBeaconAdapter.setBeaconList(beaconlist);
+        mBeaconAdapter.setBeaconList(mBeaconList);
         mListView.setAdapter(mBeaconAdapter);
         mBeaconAdapter.notifyDataSetChanged();
 
@@ -216,7 +205,10 @@ public class BeaconActivity extends AppCompatActivity {
 
 */
                 ///後で有効化するようにする
-                beaconlist.add(uuid);
+                mBeacon.setDevice(name);
+                mBeacon.setUuid(uuid);
+                mBeaconList.add(mBeacon);
+                //beaconlist.add(uuid);
                 reloadListView();
         /*
             }
