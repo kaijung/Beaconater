@@ -57,6 +57,7 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
 
     private Handler handler;
     private BeaconService2 context;
+    private String msg_uuid;
 
     @Override
     public void onCreate() {
@@ -96,6 +97,11 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
                             + beacon.getId2()+ ", minor:" + beacon.getId3()
                             + ", Distance:" + beacon.getDistance()+ ",RSSI" + beacon.getRssi());
                     Log.d("Beacon", str);
+
+                    msg_uuid = ""+beacon.getId1();
+                    if(msg_uuid!=null){
+                        sendBroadCast(msg_uuid);
+                    }
 
                     // ServiceとActivityの連携部分をやらないといけない。
                     //BeaconActivity mBeacon = new BeaconActivity();
@@ -174,10 +180,8 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         Log.d("UpdateService", "サービススタート");
-        sleep(4000);
-
-        String message = "さーびすからのメッセージ";
-        sendBroadCast(message);
+        //sleep(4000);
+        //sendBroadCast(msg_uuid);
 
         return START_STICKY;
     }

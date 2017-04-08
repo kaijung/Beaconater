@@ -11,6 +11,7 @@
         android:required="true" />
 
     <application
+        android:label="Beaconater"
         android:allowBackup="true"
         android:icon="@mipmap/icon"
         android:roundIcon="@mipmap/icon"

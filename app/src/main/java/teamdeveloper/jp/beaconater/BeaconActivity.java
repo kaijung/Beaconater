@@ -1,6 +1,8 @@
 package teamdeveloper.jp.beaconater;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -10,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ParcelUuid;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -59,6 +62,7 @@ public class BeaconActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // 入力・編集する画面に遷移させる
+
             }
         });
 
@@ -72,6 +76,7 @@ public class BeaconActivity extends AppCompatActivity {
         registerReceiver(bReceiver, intentFilter);
 
         bReceiver.registerHandler(updateHandler);
+
 
         //reloadListView();
 
@@ -119,8 +124,29 @@ public class BeaconActivity extends AppCompatActivity {
 
             Bundle bundle = msg.getData();
             String message = bundle.getString("message");
+            String uuid = bundle.getString("message");
 
             Log.d("BeaconActivity", "Handler" + message);
+            ///後で有効化するようにする
+
+            if (beaconlist.size() == 0){
+                 setText("No Name",uuid);
+             } else if (beaconlist.size() > 0) {
+                Boolean mBoolean = false;
+                if(mBeaconAdapter!=null) {
+                    for (int i = 0; i < beaconlist.size(); i++) {
+                        if (mBeaconAdapter.getItem(i).equals(uuid) == true) {
+                            Log.d("Beaconater", "ちゃんと見てます");
+                            mBoolean = true;
+                        }
+                    }
+                }
+                if(mBoolean == false) {
+                    setText("No Name",uuid);
+                }
+            }
+            //beaconlist.add(uuid);
+            //reloadListView();
             //message_tv.setText(message);
 
         }
@@ -142,17 +168,22 @@ public class BeaconActivity extends AppCompatActivity {
 
     //そのままSetTextするとエラーが起きたのでStackOverflowより
     private void setText(final String name, final String uuid){
+        /*
         runOnUiThread(new Runnable(){
+
             @Override
             public void run() {
                 //mTextview.append(value+"\n");
                 //mBeacon.add(beacon);
 
+*/
                 ///後で有効化するようにする
                 beaconlist.add(uuid);
                 reloadListView();
+        /*
             }
         });
+        */
     }
 
 
@@ -164,6 +195,7 @@ public class BeaconActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        mBeaconAdapter = new BeaconAdapter(this);
     }
 
     @Override
