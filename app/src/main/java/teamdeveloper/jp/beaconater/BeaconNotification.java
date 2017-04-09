@@ -11,40 +11,69 @@ import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
+import io.realm.Sort;
+
 // ToDo : BroadcastReceiverはAlarmManager用だったので何かしらSendReceiverしてあげる必要がある。
 // Beaconが見つかったときに出すような形にしてしまえばいい。
-
+// ToDo : Notificationが作れていない
+// ToDo : Register後はMainActivityに飛ばす
+// ToDo : 画像差し替え
 
 public class BeaconNotification extends BroadcastReceiver{
+
+    private Realm mRealm;
+    private RealmResults<BeaconDB> beaconRealmResults;
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        Log.d("BeaconNotification","Notification生成");
         Bundle bundle = intent.getExtras();
-        String message = bundle.getString("Registered");
+        String uuid = bundle.getString("ENTER_ACTION");
+        //String uuid = bundle.getString("uuid");
 
-        // 通知の設定を行う
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-        builder.setSmallIcon(R.mipmap.icon);
-        builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon));
-        builder.setWhen(System.currentTimeMillis());
-        builder.setDefaults(Notification.DEFAULT_ALL);
-        builder.setAutoCancel(true);
+        mRealm = Realm.getDefaultInstance();
+        beaconRealmResults = mRealm.where(BeaconDB.class).findAllSorted("id", Sort.DESCENDING);
 
-        //Beacon関係の情報をここにいれる
-        // タスクの情報を設定する
-        builder.setTicker(message+"検出"); // 5.0以降は表示されない
-        builder.setContentTitle(message+"検出");
-        builder.setContentText("鍵を閉め忘れていませんか");
+        if (beaconRealmResults.size() == 0){
+            Log.d("BeaconNotification","Notification生成しない");
 
-        // 通知をタップしたらアプリを起動するようにする
-        Intent startAppIntent = new Intent(context, MainActivity.class);
-        startAppIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, startAppIntent, 0);
-        builder.setContentIntent(pendingIntent);
+        }
+        else{
+            for (int j = 0; j < beaconRealmResults.size(); j++) {
+                Log.d("Realm : ",beaconRealmResults.get(j).getNotify()+"");
+                Log.d("Realm : ",beaconRealmResults.get(j).getUuid());
+                Log.d("UUID : ", uuid+"");
 
-        // 通知を表示する
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0, builder.build());
+                if (beaconRealmResults.get(j).getNotify()==true&&beaconRealmResults.get(j).getUuid().equals(uuid)==true){
+                    Log.d("BeaconNotification","Notification生成します！");
+
+                    // 通知の設定を行う
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+                    builder.setSmallIcon(R.mipmap.icon);
+                    builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon));
+                    builder.setWhen(System.currentTimeMillis());
+                    builder.setDefaults(Notification.DEFAULT_ALL);
+                    builder.setAutoCancel(true);
+
+                    //Beacon関係の情報をここにいれる
+                    // タスクの情報を設定する
+                    builder.setTicker(beaconRealmResults.get(j).getDevice()+"からのメッセージ"); // 5.0以降は表示されない
+                    builder.setContentTitle(beaconRealmResults.get(j).getDevice()+"からのメッセージ");
+                    builder.setContentText("鍵を閉め忘れていませんか");
+
+                    // 通知をタップしたらアプリを起動するようにする
+                    Intent startAppIntent = new Intent(context, MainActivity.class);
+                    startAppIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, startAppIntent, 0);
+                    builder.setContentIntent(pendingIntent);
+
+                    // 通知を表示する
+                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                    notificationManager.notify(0, builder.build());
+                }
+            }
+        }
     }
 }

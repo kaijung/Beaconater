@@ -69,9 +69,8 @@ public class BeaconActivity extends AppCompatActivity {
         //mBeaconList = new List<BeaconDB>;
         mBeaconList = new ArrayList<>();
         mBeacon = new BeaconDB();
-        mBeacon.setId(0);
         mBeacon.setUuid("");
-        mBeacon.setDevice("");
+        mBeacon.setId(beaconRealmResults.size());
         mBeacon.setRegion("");
         mBeacon.setNotify(false);
 
@@ -90,7 +89,7 @@ public class BeaconActivity extends AppCompatActivity {
                 BeaconDB beacon = (BeaconDB) parent.getAdapter().getItem(position);
                 Intent intent = new Intent( BeaconActivity.this, RegisterActivity.class );
                 intent.putExtra(MainActivity.EXTRA_TASK+"UUID", beacon.getUuid());
-                intent.putExtra(MainActivity.EXTRA_TASK, parent.getCount());
+                intent.putExtra(MainActivity.EXTRA_TASK, beaconRealmResults.size());
 
 //                intent.putExtra(EXTRA_TASK, bapp.getId());
 
@@ -142,13 +141,15 @@ public class BeaconActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
 
             Bundle bundle = msg.getData();
-            String message = bundle.getString("message");
+            //String message = bundle.getString("message");
             String uuid = bundle.getString("message");
+            setText("未登録",uuid);
 
-            Log.d("BeaconActivity", "Handler : " + message);
+            //Log.d("BeaconActivity", "Handler : " + message);
             ///後で有効化するようにする
-            Log.d("BeaconActivity",""+beaconRealmResults.size());
+            //Log.d("BeaconActivity",""+beaconRealmResults.size());
 
+            /*
             if (mBeaconList.size() == 0){
                  setText("未登録",uuid);
              } else {
@@ -167,10 +168,11 @@ public class BeaconActivity extends AppCompatActivity {
                         }
                     }
                 }
-                if(!mBoolean) {
+                if(mBoolean == false) {
                     setText("未登録",uuid);
                 }
             }
+            */
             //mBeacon.setUuid(uuid);
             //mBeaconList.add(mBeacon);
             //reloadListView();
@@ -191,6 +193,7 @@ public class BeaconActivity extends AppCompatActivity {
         mListView.setAdapter(mBeaconAdapter);
         mBeaconAdapter.notifyDataSetChanged();
 
+
     }
 
     //そのままSetTextするとエラーが起きたのでStackOverflowより
@@ -204,12 +207,38 @@ public class BeaconActivity extends AppCompatActivity {
                 //mBeacon.add(beacon);
 
 */
-                ///後で有効化するようにする
+        if (mBeaconList.size() == 0){
+            mBeacon.setDevice(name);
+            mBeacon.setUuid(uuid);
+            mBeaconList.add(mBeacon);
+            reloadListView();
+        } else {
+            Boolean mBoolean = false;
+            for (int i = 0; i < mBeaconList.size(); i++) {
+                if (mBeaconList.get(i).getUuid().equals(uuid)) {
+                    Log.d("Beaconater", "ちゃんと見てます1");
+                    mBoolean = true;
+                }
+            }
+            if(mBoolean==false&&beaconRealmResults.size()>0) {
+                for (int j = 0; j < beaconRealmResults.size(); j++) {
+                    if (beaconRealmResults.get(j).getUuid().equals(uuid)) {
+                        Log.d("Beaconater", "ちゃんと見てます2");
+                        mBoolean = true;
+                    }
+                }
+            }
+            if(mBoolean == false) {
                 mBeacon.setDevice(name);
                 mBeacon.setUuid(uuid);
                 mBeaconList.add(mBeacon);
-                //beaconlist.add(uuid);
                 reloadListView();
+            }
+        }
+                ///後で有効化するようにする
+
+                //beaconlist.add(uuid);
+
         /*
             }
         });
@@ -225,7 +254,7 @@ public class BeaconActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mBeaconAdapter = new BeaconAdapter(this);
+        //mBeaconAdapter = new BeaconAdapter(this);
     }
 
     @Override

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -39,6 +40,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
+import io.realm.Sort;
+
 //ToDo: Local Broadcast http://www.programing-style.com/android/android-api/android-localbroadcastmanager/
 
 
@@ -50,18 +55,12 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
     //任意のBeaconを指定するのに便利
     private Region mRegion;
     private RegionBootstrap regionBootstrap;
-
-
-    //TextView mTextview1;
-    //TextView mTextview2;
-    private ShowcaseView view;
-    private List<String> beaconlist;
-    ArrayList<Beacon> mBeacon = new ArrayList<>();
-    MainActivity mMain;
-
     private Handler handler;
     private BeaconService2 context;
     private String msg_uuid;
+
+    private BeaconDB mBeacon;
+    private List<BeaconDB> mBeaconList;
 
     @Override
     public void onCreate() {
@@ -76,8 +75,8 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
         // AltBeacon以外の端末をBeaconフォーマットに変換
         String IBEACON_FORMAT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
         mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
-        mBeaconManager.setForegroundBetweenScanPeriod(1000);
-        mBeaconManager.setBackgroundBetweenScanPeriod(10000);
+        mBeaconManager.setForegroundBetweenScanPeriod(600);
+        mBeaconManager.setBackgroundBetweenScanPeriod(1000);
 
         mRegion = new Region("", null, null, null);
         //new Region(null, null, null, null)
@@ -100,58 +99,20 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
                     String str = ("UUID:" + beacon.getId1() + ", major:"
                             + beacon.getId2()+ ", minor:" + beacon.getId3()
                             + ", Distance:" + beacon.getDistance()+ ",RSSI" + beacon.getRssi());
-                    Log.d("Beacon", str);
+                    Log.d("Beacon:", str);
 
                     msg_uuid = ""+beacon.getId1();
                     if(msg_uuid!=null){
-                        sendBroadCast(msg_uuid);
+                        Log.d("Beacon:",str);
+                        sendBroadCast(msg_uuid,"UPDATE_ACTION");
+                        sendBroadCast(msg_uuid, "ENTER_ACTION");
                     }
 
-                    // ServiceとActivityの連携部分をやらないといけない。
-                    //BeaconActivity mBeacon = new BeaconActivity();
-                    //if(beacon.getId1()!=null) mBeacon.setBeacon(""+beacon.getId1());
-
-
-                    /*
-                    if(beacon.getDistance()<5) {
-                        //Log.d("Beaconater",""+mBeaconAdapter.getCount());
-                        if (mBeaconAdapter.getCount() == 0) {
-                            setText(str,""+beacon.getId1());
-                            //Log.d("Beaconater","Nulldでした");
-
-                            //mListView.set(0,str);
-                        } else if (mBeaconAdapter.getCount() > 0) {
-                            Boolean mBoolean = false;
-                            for(int i = 0; i < mBeaconAdapter.getCount();i++){
-                                if(mBeaconAdapter.getItem(i).equals(""+beacon.getId1())==true){
-                                    Log.d("Beaconater","ちゃんと見てます");
-
-                                    mBoolean = true;
-                                }
-                            }
-                            if(mBoolean == false) {
-                                setText(str,""+beacon.getId1());
-                            }
-                        }
-                    }
-                    */
+                    Log.d("Beaconater", "エリアに入りました。");
                 }
             }
         });
         //reloadListView();
-    }
-
-    //そのままSetTextするとエラーが起きたのでStackOverflowより
-    private void setText(final String name, final String uuid){
-        //mTextview.append(value+"\n");
-        //mBeacon.add(beacon);
-
-        ///後で有効化するようにする
-        beaconlist.add(uuid);
-        //mBeaconAdapter.setBeaconList(beaconlist);
-        //mListView.setAdapter(mBeaconAdapter);
-        mBeaconAdapter.notifyDataSetChanged();
-        //mMain.reloadListView(beaconlist);
     }
 
     public void registerHandler(Handler UpdateHandler) {
@@ -171,13 +132,13 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
         }
     }
 
-    protected void sendBroadCast(String message) {
+    protected void sendBroadCast(String message,String action) {
 
         Intent broadcastIntent = new Intent();
         broadcastIntent.putExtra("message", message);
-        broadcastIntent.setAction("UPDATE_ACTION");
+        broadcastIntent.setAction(action);
         getBaseContext().sendBroadcast(broadcastIntent);
-
+        Log.d("Broadcast",action + " " + message);
     }
 
     @Override
@@ -195,7 +156,6 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
         super.onDestroy();
         Log.d("BeaconService2","onDestroyされました。");
     }
-
 
     @Override
     public void didEnterRegion(Region region) {
@@ -221,15 +181,13 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
         // 領域への入場を検知
         // レンジングの開始
         try {
-            mBeaconManager.startRangingBeaconsInRegion(region);
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.putExtra("Registered", "登録されているUUID");
-
-            broadcastIntent.setAction(BroadcastReceiverService.BROADCAST_DIDENTER);
-            getBaseContext().sendBroadcast(broadcastIntent);
+            // レンジング開始
+            mBeaconManager.startRangingBeaconsInRegion(mRegion);
         } catch (RemoteException e) {
+            // 例外が発生した場合
             e.printStackTrace();
         }
+
     }
 
     @Override
