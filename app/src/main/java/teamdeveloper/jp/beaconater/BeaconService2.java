@@ -44,6 +44,9 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
+import static teamdeveloper.jp.beaconater.BeaconNotification.UUID_KEY;
+import static teamdeveloper.jp.beaconater.BroadcastReceiverService.BROADCAST_DIDENTER;
+
 //ToDo: Local Broadcast http://www.programing-style.com/android/android-api/android-localbroadcastmanager/
 
 
@@ -105,7 +108,7 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
                     if(msg_uuid!=null){
                         Log.d("Beacon:",str);
                         sendBroadCast(msg_uuid,"UPDATE_ACTION");
-                        sendBroadCast(msg_uuid, "ENTER_ACTION");
+                        sendBroadCast(msg_uuid, BROADCAST_DIDENTER);
                     }
 
                     Log.d("Beaconater", "エリアに入りました。");
@@ -135,7 +138,7 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
     protected void sendBroadCast(String message,String action) {
 
         Intent broadcastIntent = new Intent();
-        broadcastIntent.putExtra("message", message);
+        broadcastIntent.putExtra(UUID_KEY, message);
         broadcastIntent.setAction(action);
         getBaseContext().sendBroadcast(broadcastIntent);
         Log.d("Broadcast",action + " " + message);

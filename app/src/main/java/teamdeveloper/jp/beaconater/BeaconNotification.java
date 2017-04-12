@@ -15,22 +15,26 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
+import static teamdeveloper.jp.beaconater.BroadcastReceiverService.BROADCAST_DIDENTER;
+
 // ToDo : BroadcastReceiverはAlarmManager用だったので何かしらSendReceiverしてあげる必要がある。
 // Beaconが見つかったときに出すような形にしてしまえばいい。
 // ToDo : Notificationが作れていない
 // ToDo : Register後はMainActivityに飛ばす
+// ToDO : 位置情報などを検討中
 // ToDo : 画像差し替え
 
 public class BeaconNotification extends BroadcastReceiver{
 
     private Realm mRealm;
     private RealmResults<BeaconDB> beaconRealmResults;
+    public static final String UUID_KEY = "message";
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
         Bundle bundle = intent.getExtras();
-        String uuid = bundle.getString("ENTER_ACTION");
+        String uuid = bundle.getString(UUID_KEY);
         //String uuid = bundle.getString("uuid");
 
         mRealm = Realm.getDefaultInstance();

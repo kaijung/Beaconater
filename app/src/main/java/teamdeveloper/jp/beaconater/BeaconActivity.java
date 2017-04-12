@@ -68,11 +68,7 @@ public class BeaconActivity extends AppCompatActivity {
         //mBeaconAdapter.setBeaconList(mRealm.copyFromRealm(beaconRealmResults));
         //mBeaconList = new List<BeaconDB>;
         mBeaconList = new ArrayList<>();
-        mBeacon = new BeaconDB();
-        mBeacon.setUuid("");
-        mBeacon.setId(beaconRealmResults.size());
-        mBeacon.setRegion("");
-        mBeacon.setNotify(false);
+
 
         // ListViewの設定
         mListView = (ListView) findViewById(R.id.list_view2);
@@ -149,7 +145,7 @@ public class BeaconActivity extends AppCompatActivity {
             ///後で有効化するようにする
             //Log.d("BeaconActivity",""+beaconRealmResults.size());
 
-            /*
+
             if (mBeaconList.size() == 0){
                  setText("未登録",uuid);
              } else {
@@ -172,7 +168,7 @@ public class BeaconActivity extends AppCompatActivity {
                     setText("未登録",uuid);
                 }
             }
-            */
+
             //mBeacon.setUuid(uuid);
             //mBeaconList.add(mBeacon);
             //reloadListView();
@@ -207,10 +203,13 @@ public class BeaconActivity extends AppCompatActivity {
                 //mBeacon.add(beacon);
 
 */
+        /*
+        BeaconDB beacon = new BeaconDB();
         if (mBeaconList.size() == 0){
-            mBeacon.setDevice(name);
-            mBeacon.setUuid(uuid);
-            mBeaconList.add(mBeacon);
+            beacon.setDevice(name);
+            beacon.setUuid(uuid);
+            mBeaconList.add(beacon);
+            mBeacon = beacon;
             reloadListView();
         } else {
             Boolean mBoolean = false;
@@ -229,12 +228,14 @@ public class BeaconActivity extends AppCompatActivity {
                 }
             }
             if(mBoolean == false) {
-                mBeacon.setDevice(name);
-                mBeacon.setUuid(uuid);
-                mBeaconList.add(mBeacon);
+                beacon.setDevice(name);
+                beacon.setUuid(uuid);
+                mBeaconList.add(beacon);
+                mBeacon = beacon;
                 reloadListView();
             }
         }
+        */
                 ///後で有効化するようにする
 
                 //beaconlist.add(uuid);
@@ -243,6 +244,20 @@ public class BeaconActivity extends AppCompatActivity {
             }
         });
         */
+        mBeacon = new BeaconDB();
+        mBeacon.setDevice("");
+        mBeacon.setUuid("");
+        mBeacon.setId(beaconRealmResults.size());
+        mBeacon.setRegion("");
+        mBeacon.setNotify(false);
+        if(mBeacon!=null) {
+            mBeacon.setDevice(name);
+            mBeacon.setUuid(uuid);
+            mBeaconList.add(mBeacon);
+            reloadListView();
+        }else{
+            return;
+        }
     }
 
 
