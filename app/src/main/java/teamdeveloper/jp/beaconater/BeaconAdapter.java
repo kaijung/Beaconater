@@ -48,8 +48,8 @@ public class BeaconAdapter extends BaseAdapter {
         TextView textView1 = (TextView) convertView.findViewById(android.R.id.text1);
         TextView textView2 = (TextView) convertView.findViewById(android.R.id.text2);
 
-        Log.d("Adapter",mBeaconList.get(position).getDevice());
-        Log.d("Adapter",mBeaconList.get(position).getUuid());
+        // Log.d("Adapter",mBeaconList.get(position).getDevice());
+        // Log.d("Adapter",mBeaconList.get(position).getUuid());
 
         // 後でBeaconクラスから情報を取得するように変更する
         textView1.setText(mBeaconList.get(position).getDevice());

@@ -41,17 +41,17 @@ public class BeaconNotification extends BroadcastReceiver{
         beaconRealmResults = mRealm.where(BeaconDB.class).findAllSorted("id", Sort.DESCENDING);
 
         if (beaconRealmResults.size() == 0){
-            Log.d("BeaconNotification","Notification生成しない");
+            //Log.d("BeaconNotification","Notification生成しない");
 
         }
         else{
             for (int j = 0; j < beaconRealmResults.size(); j++) {
-                Log.d("Realm : ",beaconRealmResults.get(j).getNotify()+"");
-                Log.d("Realm : ",beaconRealmResults.get(j).getUuid());
-                Log.d("UUID : ", uuid+"");
+                //Log.d("Realm : ",beaconRealmResults.get(j).getNotify()+"");
+                //Log.d("Realm : ",beaconRealmResults.get(j).getUuid());
+                //Log.d("UUID : ", uuid+"");
 
                 if (beaconRealmResults.get(j).getNotify()==true&&beaconRealmResults.get(j).getUuid().equals(uuid)==true){
-                    Log.d("BeaconNotification","Notification生成します！");
+                    Log.d("BeaconNotification","Notification");
 
                     // 通知の設定を行う
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(context);

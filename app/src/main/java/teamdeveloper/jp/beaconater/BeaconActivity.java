@@ -3,6 +3,7 @@ package teamdeveloper.jp.beaconater;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -31,8 +32,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
+
+import static teamdeveloper.jp.beaconater.BeaconNotification.UUID_KEY;
 
 // ToDo : Register Activityに飛ばしたりうんぬん
 // ToDo : ServiceとのActivity連携
@@ -52,20 +56,34 @@ public class BeaconActivity extends AppCompatActivity {
     private BeaconReceiver bReceiver;
     private IntentFilter intentFilter;
     private RealmResults<BeaconDB> beaconRealmResults;
+    private int Count;
+
+
+    private RealmChangeListener mRealmListener = new RealmChangeListener() {
+        @Override
+        public void onChange(Object element) {
+            //reloadListView();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.beacon_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
-        setSupportActionBar(toolbar);
+        //setSupportActionBar(toolbar);
 
         // Realmの設定
         mRealm = Realm.getDefaultInstance();
+        mRealm.addChangeListener(mRealmListener);
+
+        // ListViewの設定
         mBeaconAdapter = new BeaconAdapter(BeaconActivity.this);
         beaconRealmResults = mRealm.where(BeaconDB.class).findAllSorted("id", Sort.DESCENDING);
-        // 上記の結果を、TaskList としてセットする
-        //mBeaconAdapter.setBeaconList(mRealm.copyFromRealm(beaconRealmResults));
+
+
+        // 上記の結果を、BeaconList としてセットする
+        mBeaconAdapter.setBeaconList(mRealm.copyFromRealm(beaconRealmResults));
         //mBeaconList = new List<BeaconDB>;
         mBeaconList = new ArrayList<>();
 
@@ -94,8 +112,9 @@ public class BeaconActivity extends AppCompatActivity {
         });
 
         Context context = this;
-        Intent update_service = new Intent(context , BeaconService.class);
-        startService(update_service);
+        //Intent update_service = new Intent(context , BeaconService2.class);
+        //startService(update_service);
+        Count = 0;
         bReceiver = new BeaconReceiver();
         intentFilter = new IntentFilter();
         intentFilter.addAction("UPDATE_ACTION");
@@ -104,33 +123,144 @@ public class BeaconActivity extends AppCompatActivity {
         bReceiver.registerHandler(updateHandler);
         //reloadListView();
 
+
         startService(new Intent(BeaconActivity.this, BeaconService2.class));
     }
 
     /*
-    public void setBeacon(final String uuid) {
+    // サービスから値を受け取ったら動かしたい内容を書く
+    private Handler updateHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+
+            Bundle bundle = msg.getData();
+            //String message = bundle.getString("message");
+            String uuid = bundle.getString(UUID_KEY);
+            //setText("未登録",uuid);
+
+            Log.d("BeaconActivity", "Handler : " + uuid);
+            ///後で有効化するようにする
+            //Log.d("BeaconActivity",""+beaconRealmResults.size());
+
+
+            //Log.d("UUID : ","UUID " + uuid);
+            //Log.d("mBeacon : ","mBeacon " + mBeacon.getUuid());
+            //if (mBeaconList.size() == 0){
+            //     setText("未登録",uuid);
+            // } else {
+            beaconRealmResults = mRealm.where(BeaconDB.class).findAllSorted("id", Sort.DESCENDING);
+            Boolean mBoolean = false;
+            if(mBeaconList.size()==0&&Count == 0){
+                setText("未登録",uuid);
+                Count++;
+            }
+            else{
+                if(beaconRealmResults.size()>0) {
+                    for (int j = 0; j < beaconRealmResults.size(); j++) {
+                        Log.d("beaconRealmResults","beaconRealmResults " + beaconRealmResults.get(j).getUuid());
+                        if (beaconRealmResults.get(j).getUuid().equals(uuid)) {
+                            Log.d("Beaconater", "ちゃんと見てます2");
+                            mBoolean = true;
+                        }
+                    }
+                }
+                for (int i = 0; i < mBeaconList.size(); i++) {
+                    //Log.d("mBeaconList","mBeaconList " + mBeaconList.get(i).getUuid());
+                    if (mBeaconList.get(i).getUuid().equals(uuid)) {
+                        Log.d("Beaconater", "ちゃんと見てます1");
+                        mBoolean = true;
+                    }
+                }
+            }
+             //   }
+               // Log.d("RealmResults","RealmResults"+beaconRealmResults.size());
+
+            Log.d("mBoolean","Booleanの内容 : "+mBoolean);
+
+            if(mBoolean==true) {
+                setText("未登録",uuid);
+            }
+
+
+            //mBeacon.setUuid(uuid);
+            //mBeaconList.add(mBeacon);
+            //reloadListView();
+            //message_tv.setText(message);
+
+        }
+    };
+
+    public void reloadListView() {
+        // 後で他のクラスに変更する
+        //List<String> beaconlist = new ArrayList<String>();
+        //beaconlist.add("aaa");
+        //beaconlist.add();
+
+        //Log.d("reloadListView","動いている");
+
+
+        mBeaconAdapter.setBeaconList(mBeaconList);
+        mListView.setAdapter(mBeaconAdapter);
+        mBeaconAdapter.notifyDataSetChanged();
+    }
+
+    //そのままSetTextするとエラーが起きたのでStackOverflowより
+    private void setText(final String name, final String uuid){
         runOnUiThread(new Runnable(){
+
             @Override
             public void run() {
-                Log.d("run","ここまで動いているよー");
                 //mTextview.append(value+"\n");
                 //mBeacon.add(beacon);
 
-                if(beaconlist==null){
-                    mListView = (ListView) findViewById(R.id.list_view2);
-                    mBeaconAdapter = new BeaconAdapter(BeaconActivity.this);
-                    beaconlist = new ArrayList<String>();
+
+      BeaconDB beacon = new BeaconDB();
+        if (mBeaconList.size() == 0){
+            beacon.setDevice(name);
+            beacon.setUuid(uuid);
+            mBeaconList.add(beacon);
+            mBeacon = beacon;
+            reloadListView();
+        } else {
+            Boolean mBoolean = false;
+            for (int i = 0; i < mBeaconList.size(); i++) {
+                if (mBeaconList.get(i).getUuid().equals(uuid)) {
+                    Log.d("Beaconater", "ちゃんと見てます1");
+                    mBoolean = true;
                 }
-                ///後で有効化するようにする
-                beaconlist.add(uuid);
+            }
+            if(mBoolean==false&&beaconRealmResults.size()>0) {
+                for (int j = 0; j < beaconRealmResults.size(); j++) {
+                    if (beaconRealmResults.get(j).getUuid().equals(uuid)) {
+                        Log.d("Beaconater", "ちゃんと見てます2");
+                        mBoolean = true;
+                    }
+                }
+            }
+            if(mBoolean == false) {
+                beacon.setDevice(name);
+                beacon.setUuid(uuid);
+                mBeaconList.add(beacon);
+                mBeacon = beacon;
                 reloadListView();
             }
-        });
-        //beaconlist.add(uuid);
-        //reloadListView();
-        //return mListView;
-    }*/
+        }
+        //mBeacon.setDevice("");
+        //mBeacon.setUuid("");
+        BeaconDB sbeacon = new BeaconDB();
 
+        sbeacon.setId(0);
+        sbeacon.setRegion("");
+        sbeacon.setNotify(true);
+        //if(mBeacon!=null) {
+        sbeacon.setDevice(name);
+        sbeacon.setUuid(uuid);
+        mBeaconList.add(sbeacon);
+        Log.d("mBeaconChecker","追加しました");
+        reloadListView();
+        //}
+    }
+    */
     // サービスから値を受け取ったら動かしたい内容を書く
     private Handler updateHandler = new Handler() {
         @Override
@@ -139,7 +269,7 @@ public class BeaconActivity extends AppCompatActivity {
             Bundle bundle = msg.getData();
             //String message = bundle.getString("message");
             String uuid = bundle.getString("message");
-            setText("未登録",uuid);
+            //setText("未登録",uuid);
 
             //Log.d("BeaconActivity", "Handler : " + message);
             ///後で有効化するようにする
@@ -147,8 +277,8 @@ public class BeaconActivity extends AppCompatActivity {
 
 
             if (mBeaconList.size() == 0){
-                 setText("未登録",uuid);
-             } else {
+                setText("未登録",uuid);
+            } else {
                 Boolean mBoolean = false;
                 for (int i = 0; i < mBeaconList.size(); i++) {
                     if (mBeaconList.get(i).getUuid().equals(uuid)) {
@@ -196,12 +326,10 @@ public class BeaconActivity extends AppCompatActivity {
     private void setText(final String name, final String uuid){
         /*
         runOnUiThread(new Runnable(){
-
             @Override
             public void run() {
                 //mTextview.append(value+"\n");
                 //mBeacon.add(beacon);
-
 */
         /*
         BeaconDB beacon = new BeaconDB();
@@ -236,9 +364,9 @@ public class BeaconActivity extends AppCompatActivity {
             }
         }
         */
-                ///後で有効化するようにする
+        ///後で有効化するようにする
 
-                //beaconlist.add(uuid);
+        //beaconlist.add(uuid);
 
         /*
             }
@@ -247,7 +375,7 @@ public class BeaconActivity extends AppCompatActivity {
         mBeacon = new BeaconDB();
         mBeacon.setDevice("");
         mBeacon.setUuid("");
-        mBeacon.setId(beaconRealmResults.size());
+        mBeacon.setId(mListView.getCount());
         mBeacon.setRegion("");
         mBeacon.setNotify(false);
         if(mBeacon!=null) {
@@ -276,7 +404,6 @@ public class BeaconActivity extends AppCompatActivity {
     protected void onStart()
     {
         super.onStart();
-
     }
 
     @Override
@@ -291,6 +418,7 @@ public class BeaconActivity extends AppCompatActivity {
     {
         super.onDestroy();
         unregisterReceiver(bReceiver);
+        mRealm.close();
     }
 
     @Override

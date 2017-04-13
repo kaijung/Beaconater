@@ -102,11 +102,11 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
                     String str = ("UUID:" + beacon.getId1() + ", major:"
                             + beacon.getId2()+ ", minor:" + beacon.getId3()
                             + ", Distance:" + beacon.getDistance()+ ",RSSI" + beacon.getRssi());
-                    Log.d("Beacon:", str);
+                    //Log.d("Beacon:", str);
 
                     msg_uuid = ""+beacon.getId1();
                     if(msg_uuid!=null){
-                        Log.d("Beacon:",str);
+                        //Log.d("Beacon:",str);
                         sendBroadCast(msg_uuid,"UPDATE_ACTION");
                         sendBroadCast(msg_uuid, BROADCAST_DIDENTER);
                     }

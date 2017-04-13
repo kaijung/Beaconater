@@ -56,7 +56,7 @@ public class RegisterActivity extends Activity implements CompoundButton.OnCheck
                 Snackbar.make(v, "デバイス名を入力して下さい", Snackbar.LENGTH_LONG).show();
 
             }else {
-                addTask();
+                addBeacon();
                 finish();
             }
         }
@@ -65,7 +65,7 @@ public class RegisterActivity extends Activity implements CompoundButton.OnCheck
     private View.OnClickListener mOnCancelClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            //addTask();
+            //addBeacon();
             finish();
         }
     };
@@ -189,7 +189,7 @@ public class RegisterActivity extends Activity implements CompoundButton.OnCheck
     }
 
 
-    private void addTask() {
+    private void addBeacon() {
         Realm realm = Realm.getDefaultInstance();
 
         realm.beginTransaction();
