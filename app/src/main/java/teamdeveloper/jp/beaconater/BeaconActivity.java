@@ -43,6 +43,9 @@ import static teamdeveloper.jp.beaconater.BeaconNotification.UUID_KEY;
 // ToDo : Register Activityに飛ばしたりうんぬん
 // ToDo : ServiceとのActivity連携
 // ToDo : Beaconがない場合の表示
+// ToDO : HeadsUp Notificationは通常のNotificaitonとはちょっと違うんじゃないか。
+// ToDO : あとはLocation情報とか取れたら良いよね。（家にいるときに設定がONなら出すとか）
+// ToDO :
 
 public class BeaconActivity extends AppCompatActivity {
     private ListView mListView;

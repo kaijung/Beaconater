@@ -75,6 +75,8 @@ public class BeaconService2 extends Service implements BootstrapNotifier {
          */
         // インスタンス化
         mBeaconManager = BeaconManager.getInstanceForApplication(this);
+        mBeaconManager.removeAllRangeNotifiers();
+
         // AltBeacon以外の端末をBeaconフォーマットに変換
         String IBEACON_FORMAT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
         mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));

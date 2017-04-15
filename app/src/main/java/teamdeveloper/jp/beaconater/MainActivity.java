@@ -54,6 +54,10 @@ import io.realm.Sort;
 // Todo : BeaconAdapterはListView用
 // ToDo : Subtitle用も設定しないと
 
+// ToDo : 残りはRegisterActivityのバグ（Notifyが最初からTrue）
+// ToDo : 残りはRegister後にMainactivityに戻るやつ
+// ToDo : 残りはスクショの作成
+
 public class MainActivity extends Activity {
     public final static String EXTRA_TASK = "teamdeveloper.jp.beaconater.BeaconDB";
 

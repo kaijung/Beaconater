@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.service.notification.StatusBarNotification;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
@@ -23,6 +24,7 @@ import static teamdeveloper.jp.beaconater.BroadcastReceiverService.BROADCAST_DID
 // ToDo : Register後はMainActivityに飛ばす
 // ToDO : 位置情報などを検討中
 // ToDo : 画像差し替え
+// ToDO : IDやTagをもたせることが可能？
 
 public class BeaconNotification extends BroadcastReceiver{
 
@@ -53,12 +55,21 @@ public class BeaconNotification extends BroadcastReceiver{
                 if (beaconRealmResults.get(j).getNotify()==true&&beaconRealmResults.get(j).getUuid().equals(uuid)==true){
                     Log.d("BeaconNotification","Notification");
 
+                    // 通知を表示する
+                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+                    StatusBarNotification[] actives = notificationManager.getActiveNotifications();
+                    for(StatusBarNotification notification : actives){
+                        if(notification.getTag().equals(uuid)) return;
+                    }
+
                     // 通知の設定を行う
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
                     builder.setSmallIcon(R.mipmap.icon_trans);
                     builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon));
                     builder.setWhen(System.currentTimeMillis());
                     builder.setDefaults(Notification.DEFAULT_ALL);
+
                     builder.setAutoCancel(true);
 
                     //Beacon関係の情報をここにいれる
@@ -72,10 +83,12 @@ public class BeaconNotification extends BroadcastReceiver{
                     startAppIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
                     PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, startAppIntent, 0);
                     builder.setContentIntent(pendingIntent);
+                    builder.setFullScreenIntent(pendingIntent,false);
 
-                    // 通知を表示する
-                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                    notificationManager.notify(0, builder.build());
+
+                    // UUIDでタグをつけてあげる
+                    notificationManager.notify(uuid, 0, builder.build());
+
                 }
             }
         }
