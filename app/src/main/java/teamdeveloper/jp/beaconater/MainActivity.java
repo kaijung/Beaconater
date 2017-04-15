@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.AppLaunchChecker;
@@ -16,12 +17,14 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -211,8 +214,20 @@ public class MainActivity extends Activity {
     }
 
     public void reloadListView() {
+        TextView tv = (TextView)findViewById(R.id.text_view);
+        //CoordinatorLayout lay = (CoordinatorLayout)this.findViewById(R.id.main_layout);
+
         // Raalmデータベースから、「全てのデータを取得して新しい日時順に並べた結果」を取得
         RealmResults<BeaconDB> beaconRealmResults = mRealm.where(BeaconDB.class).findAllSorted("id", Sort.DESCENDING);
+        // 登録されているデバイスがなくなったら別のXMLを表示？
+        if(mRealm.isEmpty()){
+            tv.setVisibility(View.VISIBLE);
+            tv.setText("⊕を押してデバイスを登録");
+        }else{
+            tv.setVisibility(View.INVISIBLE);
+            tv.setText("");
+        }
+
         //.findAllSorted("Id", Sort.DESCENDING)
         // 上記の結果を、TaskList としてセットする
         mBeaconAdapter.setBeaconList(mRealm.copyFromRealm(beaconRealmResults));
@@ -229,7 +244,7 @@ public class MainActivity extends Activity {
     }
 
     private void addBeaconForTest() {
-        BeaconDB bdb = new BeaconDB();
+        /*BeaconDB bdb = new BeaconDB();
         bdb.setDevice("作業");
         bdb.setUuid("2f234454-cf6d-4a0f-adf2-f4911ba9ffa6");
         bdb.setNotify(true);
@@ -237,7 +252,7 @@ public class MainActivity extends Activity {
         bdb.setId(0);
         mRealm.beginTransaction();
         mRealm.copyToRealmOrUpdate(bdb);
-        mRealm.commitTransaction();
+        mRealm.commitTransaction();*/
     }
 
     @Override

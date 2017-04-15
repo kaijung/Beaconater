@@ -55,7 +55,7 @@ public class BeaconNotification extends BroadcastReceiver{
 
                     // 通知の設定を行う
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-                    builder.setSmallIcon(R.mipmap.icon);
+                    builder.setSmallIcon(R.mipmap.icon_trans);
                     builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon));
                     builder.setWhen(System.currentTimeMillis());
                     builder.setDefaults(Notification.DEFAULT_ALL);

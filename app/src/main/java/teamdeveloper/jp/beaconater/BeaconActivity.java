@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconManager;
@@ -36,6 +37,7 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
+import static java.lang.Thread.sleep;
 import static teamdeveloper.jp.beaconater.BeaconNotification.UUID_KEY;
 
 // ToDo : Register Activityに飛ばしたりうんぬん
@@ -70,8 +72,9 @@ public class BeaconActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.beacon_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
+        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
         //setSupportActionBar(toolbar);
+
 
         // Realmの設定
         mRealm = Realm.getDefaultInstance();
@@ -89,7 +92,7 @@ public class BeaconActivity extends AppCompatActivity {
 
 
         // ListViewの設定
-        mListView = (ListView) findViewById(R.id.list_view2);
+        mListView = (ListView) findViewById(R.id.list_view);
 
         //mBeaconAdapter = new BeaconAdapter(this);
         //beaconlist = new ArrayList<String>();
@@ -121,7 +124,7 @@ public class BeaconActivity extends AppCompatActivity {
         registerReceiver(bReceiver, intentFilter);
 
         bReceiver.registerHandler(updateHandler);
-        //reloadListView();
+        reloadListView();
 
 
         startService(new Intent(BeaconActivity.this, BeaconService2.class));
@@ -313,7 +316,18 @@ public class BeaconActivity extends AppCompatActivity {
         //beaconlist.add("aaa");
         //beaconlist.add();
 
+        TextView tv = (TextView)findViewById(R.id.text_view);
+
         Log.d("reloadListView","動いている");
+
+        // 登録されているデバイスがなくなったら別のXMLを表示？
+        if(mBeaconList.isEmpty()) {
+            tv.setVisibility(View.VISIBLE);
+            tv.setText("登録できるデバイスを探しています...");
+        }else{
+            tv.setVisibility(View.INVISIBLE);
+            tv.setText("");
+        }
 
         mBeaconAdapter.setBeaconList(mBeaconList);
         mListView.setAdapter(mBeaconAdapter);
