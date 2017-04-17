@@ -30,8 +30,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".BeaconService" />
         <service android:name=".BroadcastReceiverService" />
-        <service android:name=".BeaconService2" />
         <receiver android:name=".BeaconNotification" />
 
         <activity

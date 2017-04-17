@@ -129,7 +129,7 @@ public class BeaconActivity extends AppCompatActivity {
         reloadListView();
 
 
-        startService(new Intent(BeaconActivity.this, BeaconService2.class));
+        startService(new Intent(BeaconActivity.this, BeaconService.class));
     }
 
     /*
