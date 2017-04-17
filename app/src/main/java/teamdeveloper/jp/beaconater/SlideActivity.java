@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterViewFlipper;
@@ -15,13 +16,29 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 
+//アイコン素材 : http://icooon-mono.com/category/sign/page/15/
+
 public class SlideActivity extends Activity {
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction()==KeyEvent.ACTION_DOWN) {
+            switch (event.getKeyCode()) {
+                case KeyEvent.KEYCODE_BACK:
+                    // ダイアログ表示など特定の処理を行いたい場合はここに記述
+                    // 親クラスのdispatchKeyEvent()を呼び出さずにtrueを返す
+                    return true;
+            }
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
         // Imageリソース
     int[] images = {
             R.drawable.pic1, R.drawable.pic2, R.drawable.pic3,
                 R.drawable.pic4,R.drawable.pic5,R.drawable.pic6,
                 R.drawable.pic7,R.drawable.pic8,R.drawable.pic9,
-                R.drawable.pic10
+                R.drawable.pic10,R.drawable.pic11
         };
     Button prev;
     Button next;

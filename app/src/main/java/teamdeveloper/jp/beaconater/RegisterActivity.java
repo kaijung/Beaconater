@@ -16,6 +16,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -48,6 +49,19 @@ public class RegisterActivity extends Activity implements CompoundButton.OnCheck
 
     private BeaconDB mBeacon;
 
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction()==KeyEvent.ACTION_DOWN) {
+            switch (event.getKeyCode()) {
+                case KeyEvent.KEYCODE_BACK:
+                    // ダイアログ表示など特定の処理を行いたい場合はここに記述
+                    // 親クラスのdispatchKeyEvent()を呼び出さずにtrueを返す
+                    return true;
+            }
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
     private View.OnClickListener mOnDoneClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -57,7 +71,10 @@ public class RegisterActivity extends Activity implements CompoundButton.OnCheck
 
             }else {
                 addBeacon();
-                finish();
+                //finish();
+                Intent intent = new Intent( RegisterActivity.this, MainActivity.class );
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP	);
+                startActivity(intent);
             }
         }
     };
@@ -133,18 +150,10 @@ public class RegisterActivity extends Activity implements CompoundButton.OnCheck
         realm.close();
 
         if (mBeacon == null) {
-            // 新規作成の場合
-/*            Calendar calendar = Calendar.getInstance();
-            mYear = calendar.get(Calendar.YEAR);
-            mMonth = calendar.get(Calendar.MONTH);
-            mDay = calendar.get(Calendar.DAY_OF_MONTH);
-            mHour = calendar.get(Calendar.HOUR_OF_DAY);
-            mMinute = calendar.get(Calendar.MINUTE);*/
-
             //mSwitch.setChecked(true);
             mTextview.setText(uuid);
-            str_radio = "OUT";
-            b_switch = true;
+            str_radio = "IN";
+            b_switch = false;
 
         } else {
             // 更新の場合
