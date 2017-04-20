@@ -12,6 +12,10 @@ import android.service.notification.StatusBarNotification;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -31,6 +35,12 @@ public class BeaconNotification extends BroadcastReceiver{
     private Realm mRealm;
     private RealmResults<BeaconDB> beaconRealmResults;
     public static final String UUID_KEY = "message";
+
+    public static String getNowDate(){
+        final DateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        final Date date = new Date(System.currentTimeMillis());
+        return df.format(date);
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -76,7 +86,12 @@ public class BeaconNotification extends BroadcastReceiver{
                     // タスクの情報を設定する
                     builder.setTicker(beaconRealmResults.get(j).getDevice()+"からのメッセージ"); // 5.0以降は表示されない
                     builder.setContentTitle(beaconRealmResults.get(j).getDevice()+"からのメッセージ");
-                    builder.setContentText("鍵を閉め忘れていませんか");
+                    if(beaconRealmResults.get(j).getRegion().equals("IN")) {
+                        builder.setContentText("鍵をかけました！ " + getNowDate());
+                    }else{
+                        builder.setContentText("鍵を閉め忘れてます " + getNowDate());
+
+                    }
 
                     // 通知をタップしたらアプリを起動するようにする
                     Intent startAppIntent = new Intent(context, MainActivity.class);
